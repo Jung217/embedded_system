@@ -82,19 +82,29 @@ static  void  StartupTask (void  *p_arg);
 *********************************************************************************************************
 */
 
-static void task1(void* p_arg);
+static void task(void* p_arg);
 
-void task1(void* p_arg) {
+static INT32U CtxSwitchCount = 0;
+static INT8U  NextTaskID = 2;
+static INT8U TaskSwCount[2]; //TASK_NUMBER
+
+void task(void* p_arg) {
     task_para_set* task_data;
     task_data = p_arg;
 
     while (1) {
-        printf("Tick: %d, Hello from task%d\n", OSTime, task_data->TaskID);
+
+        printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
+        printf("%2d  task(%2d)(%2d)\ttask(%2d)(%2d)   %2d\n", OSTimeGet(), task_data->TaskID, TaskSwCount[task_data->TaskID], NextTaskID, TaskSwCount[NextTaskID], CtxSwitchCount);
+        //NextTaskID = 63;
         if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
         {
-            fprintf(Output_fp, "Tick: %d, Hello from task%d\n", OSTime, task_data->TaskID);
+            fprintf(Output_fp, "%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
+            fprintf(Output_fp, "%2d  task(%2d)(%2d)\ttask(%2d)(%2d)   %2d\n", OSTimeGet(), task_data->TaskID, TaskSwCount[task_data->TaskID], NextTaskID, TaskSwCount[NextTaskID], CtxSwitchCount);
             fclose(Output_fp);
         }
+        TaskSwCount[task_data->TaskID] = TaskSwCount[task_data->TaskID] + 1;
+        CtxSwitchCount++;
         OSTimeDly(task_data->TaskPeriodic);
     }
 }
@@ -120,10 +130,9 @@ int  main (void)
 
     Task_STK = malloc(TASK_NUMBER * sizeof(int*));
 
-
     for (int n = 0; n < TASK_NUMBER; n++) {
         Task_STK[n] = malloc(TASK_STACKSIZE * sizeof(int));
-        OSTaskCreateExt(task1,
+        OSTaskCreateExt(task,
             &TaskParameter[n],
             &Task_STK[n][TASK_STACKSIZE - 1],
             TaskParameter[n].TaskPeriodic,
@@ -132,6 +141,15 @@ int  main (void)
             TASK_STACKSIZE,
             &TaskParameter[n],
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
+        TaskSwCount[n] = 0;
+    }
+    //OSTaskCreateExt(IdleTask, ?
+
+    printf("%2d  **************\ttask( 1)( 0)\t%d\n", OSTimeGet(), CtxSwitchCount);
+    if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+    {
+        fprintf(Output_fp, "%2d  **************\ttask( 1)( 0)\t%d\n", OSTimeGet(), CtxSwitchCount);
+        fclose(Output_fp);
     }
 
 #if OS_TASK_NAME_EN > 0u

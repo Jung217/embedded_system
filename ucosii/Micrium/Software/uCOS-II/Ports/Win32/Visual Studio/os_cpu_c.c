@@ -555,6 +555,9 @@ void  OSTaskSwHook (void)
 {
 #if (OS_APP_HOOKS_EN > 0u)
     App_TaskSwHook();
+    if (OSTCBCur->OSTCBPrio == OS_TASK_IDLE_PRIO) {
+        printf("Idle task running at tick %lu\n", OSTimeGet());
+    }
 #endif
 }
 #endif
