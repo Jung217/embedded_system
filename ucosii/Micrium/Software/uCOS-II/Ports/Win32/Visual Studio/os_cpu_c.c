@@ -555,8 +555,13 @@ void  OSTaskSwHook (void)
 {
 #if (OS_APP_HOOKS_EN > 0u)
     App_TaskSwHook();
-    if (OSTCBCur->OSTCBPrio == OS_TASK_IDLE_PRIO) {
-        printf("Idle task running at tick %lu\n", OSTimeGet());
+    if (OSTCBCur != NULL && OSTCBCur->OSTCBPrio == OS_TASK_IDLE_PRIO) {
+        printf("%2d  task(%2d)     \ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), 63, OSPrioHighRdy, TaskParameter[OSPrioHighRdy-1].TaskCount,  OSCtxSwCtr-1);
+        if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+        {
+            fprintf(Output_fp, "%2d  task(%2d)     \ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), 63, OSPrioHighRdy, TaskParameter[OSPrioHighRdy-1].TaskCount, OSCtxSwCtr - 1);
+            fclose(Output_fp);
+        }
     }
 #endif
 }

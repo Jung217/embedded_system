@@ -84,27 +84,27 @@ static  void  StartupTask (void  *p_arg);
 
 static void task(void* p_arg);
 
-static INT32U CtxSwitchCount = 0;
-static INT8U  NextTaskID = 2;
-static INT8U TaskSwCount[2]; //TASK_NUMBER
-
+int lcm=1;
 void task(void* p_arg) {
     task_para_set* task_data;
     task_data = p_arg;
 
     while (1) {
-
         printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-        printf("%2d  task(%2d)(%2d)\ttask(%2d)(%2d)   %2d\n", OSTimeGet(), task_data->TaskID, TaskSwCount[task_data->TaskID], NextTaskID, TaskSwCount[NextTaskID], CtxSwitchCount);
-        //NextTaskID = 63;
+        if(TaskParameter[OSPrioHighRdy].TaskID == 0) printf("%2d  task(%2d)(%2d)\ttask(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, 63, OSCtxSwCtr);
+        else if (OSTimeGet()>0 && OSTimeGet()%lcm!=0) printf("%2d  task(%2d)(%2d)\ttask(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, 63, OSCtxSwCtr);
+        else printf("%2d  task(%2d)(%2d)\ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount, OSCtxSwCtr);
+        //printf("%d\n", TaskParameter[OSPrioHighRdy].TaskID);
+        
         if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
         {
             fprintf(Output_fp, "%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-            fprintf(Output_fp, "%2d  task(%2d)(%2d)\ttask(%2d)(%2d)   %2d\n", OSTimeGet(), task_data->TaskID, TaskSwCount[task_data->TaskID], NextTaskID, TaskSwCount[NextTaskID], CtxSwitchCount);
+            if (TaskParameter[OSPrioHighRdy].TaskID == 0) fprintf(Output_fp, "%2d  task(%2d)(%2d)\ttask(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, 63, OSCtxSwCtr);
+            else if (OSTimeGet() > 0 && OSTimeGet() % lcm != 0) fprintf(Output_fp, "%2d  task(%2d)(%2d)\ttask(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, 63, OSCtxSwCtr);
+            else fprintf(Output_fp, "%2d  task(%2d)(%2d)\ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount, OSCtxSwCtr);
             fclose(Output_fp);
         }
-        TaskSwCount[task_data->TaskID] = TaskSwCount[task_data->TaskID] + 1;
-        CtxSwitchCount++;
+        task_data->TaskCount += 1;
         OSTimeDly(task_data->TaskPeriodic);
     }
 }
@@ -135,20 +135,19 @@ int  main (void)
         OSTaskCreateExt(task,
             &TaskParameter[n],
             &Task_STK[n][TASK_STACKSIZE - 1],
-            TaskParameter[n].TaskPeriodic,
+            TaskParameter[n].TaskID, //modefied
             TaskParameter[n].TaskID,
             &Task_STK[n][0],
             TASK_STACKSIZE,
             &TaskParameter[n],
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
-        TaskSwCount[n] = 0;
+        lcm *= TaskParameter[n].TaskPeriodic;
     }
-    //OSTaskCreateExt(IdleTask, ?
 
-    printf("%2d  **************\ttask( 1)( 0)\t%d\n", OSTimeGet(), CtxSwitchCount);
+    printf("%2d\t**********\ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), TaskParameter[0].TaskID, TaskParameter[0].TaskCount, OSCtxSwCtr);
     if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
     {
-        fprintf(Output_fp, "%2d  **************\ttask( 1)( 0)\t%d\n", OSTimeGet(), CtxSwitchCount);
+        fprintf(Output_fp, "%2d\t**********\ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), TaskParameter[0].TaskID, TaskParameter[0].TaskCount, OSCtxSwCtr);
         fclose(Output_fp);
     }
 

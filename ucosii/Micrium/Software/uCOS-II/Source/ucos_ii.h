@@ -76,6 +76,7 @@ typedef struct task_para_set {
     INT16U TaskPeriodic;
     INT16U TaskNumber;
     INT16U TaskPriority;
+	INT16U TaskCount;
 } task_para_set;
 
 int TASK_NUMBER;
