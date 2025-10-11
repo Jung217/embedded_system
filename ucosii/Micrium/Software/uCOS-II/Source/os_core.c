@@ -1709,9 +1709,7 @@ void  OS_Sched (void)
 #if OS_CRITICAL_METHOD == 3u                           /* Allocate storage for CPU status register     */
     OS_CPU_SR  cpu_sr = 0u;
 #endif
-
-
-
+    printf("%2d  task(%2d)(%2d)\t", OSTimeGet(), ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount);
     OS_ENTER_CRITICAL();
     if (OSIntNesting == 0u) {                          /* Schedule only if all ISRs done and ...       */
         if (OSLockNesting == 0u) {                     /* ... scheduler is not locked                  */
@@ -1728,7 +1726,8 @@ void  OS_Sched (void)
                 OS_TLS_TaskSw();
 #endif
 #endif
-
+                if (OSTCBHighRdy != NULL && OSTCBHighRdy->OSTCBExtPtr != NULL)  printf("task(%2d)(%2d)\t%2d\n", ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount, OSCtxSwCtr-1);
+                else printf("task(%2d)\t%2d\n",63, OSCtxSwCtr-1);
                 OS_TASK_SW();                          /* Perform a context switch                     */
             }
         }
