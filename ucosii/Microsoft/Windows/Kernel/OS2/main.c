@@ -84,7 +84,6 @@ static  void  StartupTask (void  *p_arg);
 
 static void task(void* p_arg);
 
-int lcm=1;
 void task(void* p_arg) {
     task_para_set* task_data;
     task_data = p_arg;
@@ -133,7 +132,6 @@ int  main (void)
             TASK_STACKSIZE,
             &TaskParameter[n],
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
-        lcm *= TaskParameter[n].TaskPeriodic;
     }
 
     printf("%2d\t**********\ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), TaskParameter[0].TaskID, TaskParameter[0].TaskCount, OSCtxSwCtr);
