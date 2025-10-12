@@ -91,19 +91,11 @@ void task(void* p_arg) {
 
     while (1) {
         printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-        /*if (TaskParameter[OSPrioHighRdy].TaskID == 0) printf("%2d  task(%2d)(%2d)\ttask(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, 63, OSCtxSwCtr);
-        else if (OSTimeGet()>0 && OSTimeGet()%lcm!=0) printf("%2d  task(%2d)(%2d)\ttask(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, 63, OSCtxSwCtr);
-        else printf("%2d  task(%2d)(%2d)\ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount, OSCtxSwCtr);
-        //printf("%d\n", TaskParameter[OSPrioHighRdy].TaskID);
-        
         if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
         {
             fprintf(Output_fp, "%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-            if (TaskParameter[OSPrioHighRdy].TaskID == 0) fprintf(Output_fp, "%2d  task(%2d)(%2d)\ttask(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, 63, OSCtxSwCtr);
-            else if (OSTimeGet() > 0 && OSTimeGet() % lcm != 0) fprintf(Output_fp, "%2d  task(%2d)(%2d)\ttask(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, 63, OSCtxSwCtr);
-            else fprintf(Output_fp, "%2d  task(%2d)(%2d)\ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), task_data->TaskID, task_data->TaskCount, TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount, OSCtxSwCtr);
             fclose(Output_fp);
-        }*/
+        }
         task_data->TaskCount += 1;
         OSTimeDly(task_data->TaskPeriodic);
     }

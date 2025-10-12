@@ -1710,6 +1710,11 @@ void  OS_Sched (void)
     OS_CPU_SR  cpu_sr = 0u;
 #endif
     printf("%2d  task(%2d)(%2d)\t", OSTimeGet(), ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount);
+    if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+    {
+        fprintf(Output_fp, "%2d  task(%2d)(%2d)\t", OSTimeGet(), ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount);
+        fclose(Output_fp);
+    }
     OS_ENTER_CRITICAL();
     if (OSIntNesting == 0u) {                          /* Schedule only if all ISRs done and ...       */
         if (OSLockNesting == 0u) {                     /* ... scheduler is not locked                  */
@@ -1728,6 +1733,12 @@ void  OS_Sched (void)
 #endif
                 if (OSTCBHighRdy != NULL && OSTCBHighRdy->OSTCBExtPtr != NULL)  printf("task(%2d)(%2d)\t%2d\n", ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount, OSCtxSwCtr-1);
                 else printf("task(%2d)\t%2d\n",63, OSCtxSwCtr-1);
+                if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+                {
+                    if (OSTCBHighRdy != NULL && OSTCBHighRdy->OSTCBExtPtr != NULL)  fprintf(Output_fp, "task(%2d)(%2d)\t%2d\n", ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount, OSCtxSwCtr - 1);
+                    else fprintf(Output_fp, "task(%2d)\t%2d\n", 63, OSCtxSwCtr - 1);
+                    fclose(Output_fp);
+                }
                 OS_TASK_SW();                          /* Perform a context switch                     */
             }
         }
