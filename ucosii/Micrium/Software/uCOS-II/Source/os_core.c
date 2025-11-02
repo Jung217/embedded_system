@@ -1735,16 +1735,29 @@ void  OS_Sched (void)
                 OS_TLS_TaskSw();
 #endif
 #endif           
-                if (((task_para_set*)(originTcb->OSTCBExtPtr))->TaskRemainTime == 0) printf("%2d  Completion\ttask(%2d)(%2d)\t", OSTimeGet(), ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskCount - 1);
+                /*if (((task_para_set*)(originTcb->OSTCBExtPtr))->TaskRemainTime == 0) printf("%2d  Completion\ttask(%2d)(%2d)\t%d\t", OSTimeGet(), ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskCount - 1, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDuration);
                 else printf("%2d  Preemption\ttask(%2d)(%2d)\t", OSTimeGet(), ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskCount - 1);
                 if (OSTCBHighRdy != NULL && OSTCBHighRdy->OSTCBExtPtr != NULL)  printf("task(%2d)(%2d)\n", ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount);
-                else printf("task(%2d)\n",63);
-                if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-                {
-                    if (OSTCBHighRdy != NULL && OSTCBHighRdy->OSTCBExtPtr != NULL)  fprintf(Output_fp, "task(%2d)(%2d)\n", ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount);
-                    else fprintf(Output_fp, "task(%2d)\n", 63);
-                    fclose(Output_fp);
+                else printf("task(%2d)\n",63);*/
+
+
+                /*int remainTime = ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskRemainTime;
+                int originID = ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID;
+                int jobCount = ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskCount - 1;
+                int duration = ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDuration;
+
+                int ID_HighRdy = ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID;
+                int jobCount_ID_HighRdy = ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount;
+
+
+                if (remainTime == 0) {
+                    printf("%2d  Completion\ttask(%2d)(%2d)", OSTimeGet(), originID, jobCount);
+                    if (OSTCBHighRdy != NULL && OSTCBHighRdy->OSTCBExtPtr != NULL)  printf("task(%2d)(%2d)\t%d\n", ID_HighRdy, jobCount_ID_HighRdy, duration);
+                    else printf("task(%2d)\t%d\n", 63, duration);
                 }
+                else printf("%2d  Preemption\ttask(%2d)(%2d)\t", OSTimeGet(), ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskCount - 1);*/
+
+
                 OS_TASK_SW();                          /* Perform a context switch                     */
             }
         }
@@ -1797,28 +1810,40 @@ static  void  OS_SchedNew (void)
 #endif
 
 #if RM
-    //printf("RM\t");
+     //printf("RM\t");
 
-    int mini = 99;
-    int TaskID_HighRdy=63;
-    //OSPrioHighRdy = 63;
+     int mini = 99;
+     int TaskID_HighRdy=63;
+     //printf("%d\t", mini);
+     //if (OSTCBHighRdy != NULL ) {
+     //    for (int i = TASK_NUMBER; i >= 0; i--) {
+     //        if (OSTCBTbl[i].OSTCBPrio != 63) { //&& ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID != TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskID
+     //           if (TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskPeriodic < mini) {
+     //               //printf("%c", OSTCBTbl[i].OSTCBStat);
+     //               mini = TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskPeriodic;
+     //               //printf("OSPrioHighRdy - 1 = %d\n", OSTCBTbl[i].OSTCBPrio - 1);
+     //               OSPrioHighRdy = OSTCBTbl[i].OSTCBPrio; //OSTCBTbl[i].OSTCBPrio - 1   TaskID_HighRdy
+     //               //printf("OSTCBTbl[i].OSTCBPrio = %d\n", OSTCBTbl[i].OSTCBPrio);
+     //               //printf("ID = %d, mini=%d, high=%d\t", TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskID, mini, OSPrioHighRdy);
+     //           }
+     //        }
+     //    }
+     //}
+     //printf("%d\t", mini);
 
-    for (int i = OS_MAX_TASKS + OS_N_SYS_TASKS;i >= 0;i--) {
-        if (OSTCBTbl[i].OSTCBPrio != 0 && TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskPeriodic > 0) {
-            //printf("ID = %d\n", TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskID);
-            if (OSTCBTbl[i].OSTCBStat == OS_STAT_RDY) {
-                if (TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskPeriodic < mini) {
-                    mini = TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskPeriodic;
-                    //printf("OSPrioHighRdy - 1 = %d\n", OSTCBTbl[i].OSTCBPrio - 1);
-                    OSPrioHighRdy = TaskParameter[OSPrioHighRdy - 1].TaskID; //OSTCBTbl[i].OSTCBPrio - 1   TaskID_HighRdy
-                    //printf("ID = %d, mini=%d, high=%d\t", TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskID, mini, OSPrioHighRdy);
+     if (OSTCBHighRdy != NULL ) {
+         for (int i = TASK_NUMBER; i >= 0; i--) {
+             if (OSTCBTbl[i].OSTCBPrio != 63) {
+                if (OSTCBTbl[i].OSTCBStat == OS_STAT_RDY) {
+                    //printf("\nTICk=%d, ID=%d, Remain=%d\n", OSTimeGet(), TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskID, TaskParameter[OSTCBTbl[i].OSTCBPrio - 1].TaskRemainTime);
                 }
-			}
-        }
-    }
-    //OSPrioHighRdy = TaskID_HighRdy;
-    if (OSPrioHighRdy > 63) OSPrioHighRdy = 63; // ????
-    //if (mini == 99) OSPrioHighRdy = OS_LOWEST_PRIO;
+             }
+         }
+     }
+
+     if (OSPrioHighRdy ==0 || OSPrioHighRdy > 63) OSPrioHighRdy = 63; // ????
+     //printf("%d\t", OSPrioHighRdy);
+
 #elif FIFO
     printf("FIFO\n");
     //OS_SchedNew_FIFO();

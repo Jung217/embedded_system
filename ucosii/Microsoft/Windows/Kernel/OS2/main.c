@@ -87,31 +87,27 @@ static void task(void* p_arg);
 void task(void* p_arg) {
     task_para_set* task_data;
     task_data = p_arg;
-
-    task_data->TaskStartTime = OSTimeGet();
-    task_data->TaskRemainTime = task_data->TaskExecutionTIme;
-    int time_tag = OSTimeGet();
-    //printf("Remain %d ", task_data->TaskRemainTime);
-
+    int timeTag;
     while (1) {
-        if (task_data->TaskRemainTime > 0) {
-            //task_data->TaskRemainTime -= (OSTimeGet() - task_data->TaskStartTime);
-            printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-            {
-                fprintf(Output_fp, "%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-                fclose(Output_fp);
-            }
-            while (task_data->TaskRemainTime > 0) {
-                if ((OSTimeGet() - time_tag) == 1) {
-                    task_data->TaskRemainTime -= (OSTimeGet() - task_data->TaskStartTime);
-					time_tag = OSTimeGet();
-                    //printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-                }
-            }
-        }
+        timeTag = OSTimeGet();
+        task_data->TaskRemainTime = task_data->TaskExecutionTIme;
+        task_data->TaskStartTime = OSTimeGet();
+        task_data->TaskDuration = 0;
+        printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
+        //while (OSTimeGet()==timeTag) {//task_data->TaskRemainTime > 0
+        //    task_data->TaskRemainTime -= 1;
+        //    //printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
+        //}
+        //while (task_data->TaskRemainTime > 0) {
+        //    if (OSTimeGet() == timeTag) {
+        //        task_data->TaskRemainTime -= 1;
+        //        timeTag += 1;
+        //        printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
+        //    }
+        //}
         task_data->TaskCount += 1;
-        OSTimeDly(1);
+        task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
+        OSTimeDly(task_data->TaskPeriodic - task_data->TaskDuration);
     }
 }
 
@@ -152,8 +148,8 @@ int  main (void)
 
     printf("==========TCB linked list==========\n");
     printf("Task \t Prev_TCB_addr   TCB_addr   Next_TCB_addr\n");
-    for (int i = OS_MAX_TASKS + OS_N_SYS_TASKS;i >= 0;i--) if (OSTCBTbl[i].OSTCBPrio != 0) printf("%2d \t %6x \t %6x \t %6x\n", OSTCBTbl[i].OSTCBPrio, OSTCBTbl[i].OSTCBPrev, &OSTCBTbl[i], OSTCBTbl[i].OSTCBNext);
-    printf("\n");
+    for (int i = TASK_NUMBER;i >= 0 ;i--) if (OSTCBTbl[i].OSTCBPrio != 0) printf("%2d \t %6x \t %6x \t %6x\n", OSTCBTbl[i].OSTCBPrio, OSTCBTbl[i].OSTCBPrev, &OSTCBTbl[i], OSTCBTbl[i].OSTCBNext);
+    printf("\n");//OS_MAX_TASKS + OS_N_SYS_TASKS
 
 #if OS_TASK_NAME_EN > 0u
     OSTaskNameSet(         APP_CFG_STARTUP_TASK_PRIO,

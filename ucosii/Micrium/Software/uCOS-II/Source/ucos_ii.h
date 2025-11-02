@@ -71,7 +71,7 @@ extern "C" {
 
 #define RM 1
 #define FIFO 0
-//#define ALGORITHM RM/FIFO
+#define ALGORITHM RM
 
 typedef struct task_para_set {
     INT16U TaskID;
@@ -83,6 +83,7 @@ typedef struct task_para_set {
 	INT16U TaskCount;
     INT16U TaskStartTime;
     INT16U TaskRemainTime;
+    INT16U TaskDuration;
 } task_para_set;
 
 int TASK_NUMBER;
