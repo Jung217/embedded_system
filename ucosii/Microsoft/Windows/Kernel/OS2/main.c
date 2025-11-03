@@ -98,13 +98,15 @@ void task(void* p_arg) {
         //    task_data->TaskRemainTime -= 1;
         //    //printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
         //}
-        //while (task_data->TaskRemainTime > 0) {
-        //    if (OSTimeGet() == timeTag) {
-        //        task_data->TaskRemainTime -= 1;
-        //        timeTag += 1;
-        //        printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-        //    }
-        //}
+        while (task_data->TaskRemainTime > 0) {
+            if (OSTimeGet() - timeTag) {
+                task_data->TaskRemainTime -= 1;
+                timeTag += 1;
+                if (task_data->TaskRemainTime == 0) continue;
+                printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
+            }
+        }
+        //while ((OSTimeGet() - timeTag) < task_data->TaskExecutionTIme)
         task_data->TaskCount += 1;
         task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
         OSTimeDly(task_data->TaskPeriodic - task_data->TaskDuration);
