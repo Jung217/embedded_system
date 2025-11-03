@@ -113,7 +113,7 @@ static void task(void* p_arg);
         OSTimeDly(task_data->TaskDly);
     }
 }*/
-/*void task(void* p_arg) {
+void task(void* p_arg) {
     task_para_set* task_data = (task_para_set*)p_arg;
     int next_period_start_time = task_data->TaskArriveTime;
     int timeTag;
@@ -124,6 +124,7 @@ static void task(void* p_arg);
     while (1) {
         task_data->TaskDuration = 0;
         task_data->TaskPrermpTime = 0;
+        task_data->TaskStartTime = OSTimeGet();
         task_data->TaskRemainTime = task_data->TaskExecutionTIme;
 
         for (int i = 0; i < task_data->TaskExecutionTIme; i++) {
@@ -139,14 +140,16 @@ static void task(void* p_arg);
 
         next_period_start_time += task_data->TaskPeriodic;
         timeTag = OSTimeGet();
-
+        task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
+		task_data->TaskPrermpTime = task_data->TaskDuration - task_data->TaskExecutionTIme;
+        
         if (timeTag > next_period_start_time) task_data->TaskDly = 0;
         else task_data->TaskDly = next_period_start_time - timeTag;
 
         if (task_data->TaskDly > 0) OSTimeDly(task_data->TaskDly);
     }
-}*/
-void task(void* p_arg) {
+}
+/*void task(void* p_arg) { // with RM
     task_para_set* task_data = p_arg;
 
     while (1) {
@@ -167,7 +170,7 @@ void task(void* p_arg) {
 
         if (task_data->TaskDly > 0) OSTimeDly(task_data->TaskDly); // 等待下一個週期
     }
-}
+}*/
 
 int  main (void)
 {

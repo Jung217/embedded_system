@@ -1729,7 +1729,7 @@ void  OS_Sched (void)
                 OS_TLS_TaskSw();
 #endif
 #endif           
-                /*if (((task_para_set*)(originTcb->OSTCBExtPtr))->TaskRemainTime == 0) {
+                if (((task_para_set*)(originTcb->OSTCBExtPtr))->TaskRemainTime == 0) {
                     printf("%2d  Completion\ttask(%2d)(%2d)\t", 
                         OSTimeGet(),
                         ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID,
@@ -1751,7 +1751,7 @@ void  OS_Sched (void)
                     ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDuration,
                     ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskPrermpTime,
                     ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDly
-                );*/
+                );
                 OS_TASK_SW();                          /* Perform a context switch                     */
             }
         }

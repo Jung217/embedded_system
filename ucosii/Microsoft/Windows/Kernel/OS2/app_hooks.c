@@ -273,15 +273,21 @@ void  App_TaskSwHook (void)
 #if (APP_CFG_PROBE_OS_PLUGIN_EN > 0) && (OS_PROBE_HOOKS_EN > 0)
     OSProbe_TaskSwHook();
 #endif
-    /*if (OSTCBCur != NULL && OSTCBCur->OSTCBPrio == OS_TASK_IDLE_PRIO) {
+    if (OSTCBCur != NULL && OSTCBCur->OSTCBPrio == OS_TASK_IDLE_PRIO) {
         printf("%2d  Preemption\ttask(%2d)\t", OSTimeGet(), 63);
         printf("task(%2d)(%2d)\n", TaskParameter[OSPrioHighRdy - 1].TaskID, TaskParameter[OSPrioHighRdy - 1].TaskCount);
     }
     else if (OSTCBCur != NULL && TaskParameter[OSPrioHighRdy - 1].TaskRemainTime == 0 && TaskParameter[OSPrioHighRdy].TaskID != 0) {
-        TaskParameter[OSPrioHighRdy].TaskPrermpTime++;
-        printf("%2d  Preemption\ttask(%2d)(%2d)\t", OSTimeGet(), TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount);
-        printf("task(%2d)(%2d)\n", TaskParameter[OSPrioHighRdy - 1].TaskID, TaskParameter[OSPrioHighRdy - 1].TaskCount);
-    }*/
+        if (TaskParameter[OSPrioHighRdy].TaskRemainTime-1 == 0) {
+            printf("%2d  Completion\ttask(%2d)(%2d)\t", OSTimeGet(), TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount);
+            printf("task(%2d)(%2d)\t%d\t%d\t%d\n", TaskParameter[OSPrioHighRdy - 1].TaskID, TaskParameter[OSPrioHighRdy - 1].TaskCount, TaskParameter[OSPrioHighRdy].TaskDuration, TaskParameter[OSPrioHighRdy].TaskPrermpTime, TaskParameter[OSPrioHighRdy].TaskDly);
+        }
+        else {
+            //printf("RMT=%d\t", TaskParameter[OSPrioHighRdy].TaskRemainTime);
+            printf("%2d  Preemption\ttask(%2d)(%2d)\t", OSTimeGet(), TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount);
+            printf("task(%2d)(%2d)\n", TaskParameter[OSPrioHighRdy - 1].TaskID, TaskParameter[OSPrioHighRdy - 1].TaskCount);
+        }
+    }
 }
 #endif
 
