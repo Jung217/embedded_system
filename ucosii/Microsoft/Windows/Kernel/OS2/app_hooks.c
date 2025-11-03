@@ -273,7 +273,15 @@ void  App_TaskSwHook (void)
 #if (APP_CFG_PROBE_OS_PLUGIN_EN > 0) && (OS_PROBE_HOOKS_EN > 0)
     OSProbe_TaskSwHook();
 #endif
-    if (OSTCBCur != NULL && TaskParameter[OSPrioHighRdy - 1].TaskRemainTime == 0)printf("%2d  Preemption\ttask(%2d)(%2d)\t\n", OSTimeGet(), TaskParameter[OSPrioHighRdy - 1].TaskID, TaskParameter[OSPrioHighRdy - 1].TaskCount);
+    if (OSTCBCur != NULL && OSTCBCur->OSTCBPrio == OS_TASK_IDLE_PRIO) {
+        printf("%2d  Preemption\ttask(%2d)\t", OSTimeGet(), 63);
+        printf("task(%2d)(%2d)\n", TaskParameter[OSPrioHighRdy - 1].TaskID, TaskParameter[OSPrioHighRdy - 1].TaskCount);
+    }
+    else if (OSTCBCur != NULL && TaskParameter[OSPrioHighRdy - 1].TaskRemainTime == 0 && TaskParameter[OSPrioHighRdy].TaskID != 0) {
+        TaskParameter[OSPrioHighRdy].TaskPrermpTime++;
+        printf("%2d  Preemption\ttask(%2d)(%2d)\t", OSTimeGet(), TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount);
+        printf("task(%2d)(%2d)\n", TaskParameter[OSPrioHighRdy - 1].TaskID, TaskParameter[OSPrioHighRdy - 1].TaskCount);
+    }
 	//premeption ??
     //if (OSTCBCur != NULL && OSTCBCur->OSTCBPrio == OS_TASK_IDLE_PRIO) {
     //    printf("%2d  task(%2d)     \ttask(%2d)(%2d)\t%2d\n", OSTimeGet(), 63, OSPrioHighRdy, TaskParameter[OSPrioHighRdy - 1].TaskCount, OSCtxSwCtr - 1);

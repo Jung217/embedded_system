@@ -84,6 +84,8 @@ typedef struct task_para_set {
     INT16U TaskStartTime;
     INT16U TaskRemainTime;
     INT16U TaskDuration;
+    INT16U TaskPrermpTime;
+    INT16U TaskDly;
 } task_para_set;
 
 int TASK_NUMBER;

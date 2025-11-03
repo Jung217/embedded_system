@@ -1735,11 +1735,31 @@ void  OS_Sched (void)
                 OS_TLS_TaskSw();
 #endif
 #endif           
-                if (((task_para_set*)(originTcb->OSTCBExtPtr))->TaskRemainTime == 0) printf("%2d  Completion\ttask(%2d)(%2d)\t", OSTimeGet(), ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskCount - 1, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDuration);
-                else printf("%2d  Preemption\ttask(%2d)(%2d)\t", OSTimeGet(), ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskCount - 1);
+                if (((task_para_set*)(originTcb->OSTCBExtPtr))->TaskRemainTime == 0) {
+                    printf("%2d  Completion\ttask(%2d)(%2d)\t", 
+                        OSTimeGet(),
+                        ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID,
+                        ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskCount - 1,
+                        ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDuration
+                    );
+                }
+                //else printf("%2d  Preemption\ttask(%2d)(%2d)\t", OSTimeGet(), ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskID, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskCount - 1);
                 
-                if (OSTCBHighRdy != NULL && OSTCBHighRdy->OSTCBExtPtr != NULL)  printf("task(%2d)(%2d)\t%d\n", ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount, ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDuration);
-                else printf("task(%2d)\n",63);
+                if (OSTCBHighRdy != NULL && OSTCBHighRdy->OSTCBExtPtr != NULL) {
+                    printf("task(%2d)(%2d)\t%d\t%d\t%d\n",
+                        ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
+                        ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
+                        ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDuration,
+                        ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskPrermpTime,
+                        ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDly
+                    );
+                }
+                else printf("task(%2d)\t%d\t%d\t%d\n",
+                    63,
+                    ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDuration,
+                    ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskPrermpTime,
+                    ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskDly
+                );
 
 
                 /*int remainTime = ((task_para_set*)(originTcb->OSTCBExtPtr))->TaskRemainTime;
