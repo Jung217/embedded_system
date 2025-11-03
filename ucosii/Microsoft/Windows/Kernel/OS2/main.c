@@ -83,8 +83,8 @@ static  void  StartupTask (void  *p_arg);
 */
 
 static void task(void* p_arg);
-
-void task(void* p_arg) {
+//int timeTag;
+/*void task(void* p_arg) {
     task_para_set* task_data;
     task_data = p_arg;
     int timeTag;
@@ -95,22 +95,77 @@ void task(void* p_arg) {
         task_data->TaskDuration = 0;
         task_data->TaskPrermpTime = 0;
         printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-        //while (OSTimeGet()==timeTag) {//task_data->TaskRemainTime > 0
-        //    task_data->TaskRemainTime -= 1;
-        //    //printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-        //}
         while (task_data->TaskRemainTime > 0) {
-            if (OSTimeGet() - timeTag) {
+            //printf("T=%d TG=%d", OSTimeGet(), timeTag);
+            while (OSTimeGet() == timeTag) {}
+            if ((OSTimeGet() - timeTag)>=1) {
                 task_data->TaskRemainTime -= 1;
                 timeTag += 1;
+                
                 if (task_data->TaskRemainTime == 0) continue;
                 printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
             }
+            
         }
         task_data->TaskCount += 1;
         task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
         task_data->TaskDly = task_data->TaskPeriodic - task_data->TaskDuration;
         OSTimeDly(task_data->TaskDly);
+    }
+}*/
+/*void task(void* p_arg) {
+    task_para_set* task_data = (task_para_set*)p_arg;
+    int next_period_start_time = task_data->TaskArriveTime;
+    int timeTag;
+
+    timeTag = OSTimeGet();
+    if (next_period_start_time > timeTag) OSTimeDly(next_period_start_time - timeTag);
+
+    while (1) {
+        task_data->TaskDuration = 0;
+        task_data->TaskPrermpTime = 0;
+        task_data->TaskRemainTime = task_data->TaskExecutionTIme;
+
+        for (int i = 0; i < task_data->TaskExecutionTIme; i++) {
+            printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
+            timeTag = OSTimeGet();
+
+            while (OSTimeGet() == timeTag) {}
+            task_data->TaskRemainTime -= 1;
+        }
+
+        task_data->TaskCount += 1;
+        task_data->TaskRemainTime = 0;
+
+        next_period_start_time += task_data->TaskPeriodic;
+        timeTag = OSTimeGet();
+
+        if (timeTag > next_period_start_time) task_data->TaskDly = 0;
+        else task_data->TaskDly = next_period_start_time - timeTag;
+
+        if (task_data->TaskDly > 0) OSTimeDly(task_data->TaskDly);
+    }
+}*/
+void task(void* p_arg) {
+    task_para_set* task_data = p_arg;
+
+    while (1) {
+        task_data->TaskRemainTime = task_data->TaskExecutionTIme;
+        task_data->TaskStartTime = OSTimeGet();
+        task_data->TaskDuration = 0;
+        task_data->TaskPrermpTime = 0;
+
+        while (task_data->TaskRemainTime > 0) {
+            printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
+            task_data->TaskRemainTime -= 1;
+            OSTimeDly(1);  // 切換到其他任務
+        }
+
+        task_data->TaskCount += 1;
+        task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
+        task_data->TaskDly = task_data->TaskPeriodic - task_data->TaskDuration;
+
+        if (task_data->TaskDly > 0) OSTimeDly(task_data->TaskDly); // 等待下一個週期
     }
 }
 

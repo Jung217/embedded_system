@@ -1,10 +1,6 @@
 ﻿  os_core.c
 C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Micrium\Software\uCOS-II\Source\os_core.c(964,13): warning C4013: 'exit' 未定義; 假設 extern 傳回整數
-C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Micrium\Software\uCOS-II\Source\os_core.c(1743,67): warning C4474: 'printf': 傳遞給格式字串的引數太多
-      C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Micrium\Software\uCOS-II\Source\os_core.c(1743,67):
-      預留位置及其參數需要 3 個 variadic 引數，但卻提供了 4 個
-  
-C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Micrium\Software\uCOS-II\Source\os_core.c(2247,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
-C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Micrium\Software\uCOS-II\Source\os_core.c(2248,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
-C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Micrium\Software\uCOS-II\Source\os_core.c(2249,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
+C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Micrium\Software\uCOS-II\Source\os_core.c(2218,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
+C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Micrium\Software\uCOS-II\Source\os_core.c(2219,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
+C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Micrium\Software\uCOS-II\Source\os_core.c(2220,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
   OS2.vcxproj -> C:\Users\alex2\Desktop\vsCode\embedded_system\ucosii\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe

@@ -69,7 +69,7 @@ extern "C" {
 #define MAX 20
 #define INFO 4
 
-#define RM 0
+#define RM 1
 #define FIFO 0
 #define ALGORITHM RM
 
