@@ -106,7 +106,6 @@ void task(void* p_arg) {
                 printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
             }
         }
-        //while ((OSTimeGet() - timeTag) < task_data->TaskExecutionTIme)
         task_data->TaskCount += 1;
         task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
         OSTimeDly(task_data->TaskPeriodic - task_data->TaskDuration);
