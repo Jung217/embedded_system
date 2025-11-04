@@ -101,6 +101,11 @@ void task(void* p_arg) {
         // task_data->TaskRemainTime = task_data->TaskExecutionTIme;
         for (int i = 0; i < task_data->TaskExecutionTIme; i++) {
             printf("%2d  task(%2d) is running\t\n", OSTime, task_data->TaskID);
+            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+            {
+                fprintf(Output_fp, "%2d  task(%2d) is running\t\n", OSTime, task_data->TaskID);
+                fclose(Output_fp);
+            }
             //task_data->RemainTime -= 1;
             timeTag = OSTimeGet();
 
@@ -123,17 +128,32 @@ void task(void* p_arg) {
         OSTimeDly(task_data->TaskDly);
      
         if (OSTCBHighRdy == OSTCBCur && OSTCBCur->CompletedFlag == 1) {
-                printf("%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
+            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount += 1;
+            printf("%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
+                OSTimeGet(),
+                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
+                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
+                ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
+                ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
+                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration+1,
+                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime+1,
+                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
+            );
+            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+            {
+                fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
                     OSTimeGet(),
                     ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++,
+                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
                     ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
                     ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration+1,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime+1,
+                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration + 1,
+                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime + 1,
                     ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
                 );
-                OSTCBCur->CompletedFlag = 0;
+                fclose(Output_fp);
+            }
+            OSTCBCur->CompletedFlag = 0;
         }
     }
 }

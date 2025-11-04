@@ -728,6 +728,17 @@ void  OSIntExit(void)
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount
                             );
+                            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+                            {
+                                fprintf(Output_fp, "%2d  Preemption\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t\n",
+                                    OSTimeGet(),
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
+                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
+                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount
+                                );
+                                fclose(Output_fp);
+                            }
                         }
                         else {
                             printf("%2d  Preemption\ttask(%2d)\ttask(%2d)(%2d)\t\n", 
@@ -736,6 +747,16 @@ void  OSIntExit(void)
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount
                             );
+                            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+                            {
+                                fprintf(Output_fp, "%2d  Preemption\ttask(%2d)\ttask(%2d)(%2d)\t\n",
+                                    OSTimeGet(),
+                                    OSTCBCur->OSTCBPrio,
+                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
+                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount
+                                );
+                                fclose(Output_fp);
+                            }
                         }
                     }
                     if (OSTCBCur->CompletedFlag == 1) {
@@ -750,6 +771,20 @@ void  OSIntExit(void)
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime+1,
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly+1
                             );
+                            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+                            {
+                                fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
+                                    OSTimeGet(),
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
+                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
+                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration + 1,
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime + 1,
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly + 1
+                                );
+                                fclose(Output_fp);
+                            }
                         }
                         else {
                             printf("%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n",
@@ -761,6 +796,19 @@ void  OSIntExit(void)
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime+1,
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly+1
                             );
+                            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+                            {
+                                fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n",
+                                    OSTimeGet(),
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
+                                    OSTCBHighRdy->OSTCBPrio,
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration + 1,
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime + 1,
+                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly + 1
+                                );
+                                fclose(Output_fp);
+                            }
                         }
                         ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++;
                         OSTCBCur->CompletedFlag = 0;
@@ -1793,6 +1841,20 @@ void  OS_Sched(void)
                             ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime,
                             ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
                         );
+                        if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+                        {
+                            fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
+                                OSTimeGet(),
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
+                                ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
+                                ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
+                            );
+                            fclose(Output_fp);
+                        }
                     }
                     else {
                         printf("%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n", 
@@ -1804,6 +1866,19 @@ void  OS_Sched(void)
                             ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime,
                             ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
                         );
+                        if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
+                        {
+                            fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n",
+                                OSTimeGet(),
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
+                                OSTCBHighRdy->OSTCBPrio,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
+                            );
+                            fclose(Output_fp);
+                        }
                     }
                     ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++;
                     OSTCBCur->CompletedFlag = 0;
