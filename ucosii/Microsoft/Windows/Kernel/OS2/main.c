@@ -134,7 +134,6 @@ void task(void* p_arg) {
             while (OSTimeGet() == timeTag) {}
             task_data->TaskRemainTime -= 1;
         }
-
         task_data->TaskCount += 1;
         task_data->TaskRemainTime = 0;
 
@@ -147,6 +146,23 @@ void task(void* p_arg) {
         else task_data->TaskDly = next_period_start_time - timeTag;
 
         if (task_data->TaskDly > 0) OSTimeDly(task_data->TaskDly);
+
+        //if (task_data->TaskRemainTime == 0 && OSTCBCur == OSTCBHighRdy) {
+        //    printf("%2d  Completion\ttask(%2d)(%2d)\t",
+        //        OSTimeGet(),
+        //        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
+        //        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount - 1,
+        //        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration
+        //    );
+        //    printf("task(%2d)(%2d)\t%d\t%d\t%d\n",
+        //        ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
+        //        ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
+        //        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration,
+        //        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime,
+        //        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
+        //    );
+        //    task_data->TaskRemainTime = task_data->TaskExecutionTIme;
+        //}
     }
 }
 /*void task(void* p_arg) { // with RM

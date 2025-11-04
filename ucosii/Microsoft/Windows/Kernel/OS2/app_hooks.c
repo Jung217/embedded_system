@@ -279,11 +279,13 @@ void  App_TaskSwHook (void)
     }
     else if (OSTCBCur != NULL && TaskParameter[OSPrioHighRdy - 1].TaskRemainTime == 0 && TaskParameter[OSPrioHighRdy].TaskID != 0) {
         if (TaskParameter[OSPrioHighRdy].TaskRemainTime-1 == 0) {
+            TaskParameter[OSPrioHighRdy].TaskDuration = OSTimeGet() - TaskParameter[OSPrioHighRdy].TaskStartTime;
+            TaskParameter[OSPrioHighRdy].TaskPrermpTime = TaskParameter[OSPrioHighRdy].TaskDuration - TaskParameter[OSPrioHighRdy].TaskExecutionTIme;
+			TaskParameter[OSPrioHighRdy].TaskDly = TaskParameter[OSPrioHighRdy].TaskPeriodic - TaskParameter[OSPrioHighRdy].TaskDuration;
             printf("%2d  Completion\ttask(%2d)(%2d)\t", OSTimeGet(), TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount);
             printf("task(%2d)(%2d)\t%d\t%d\t%d\n", TaskParameter[OSPrioHighRdy - 1].TaskID, TaskParameter[OSPrioHighRdy - 1].TaskCount, TaskParameter[OSPrioHighRdy].TaskDuration, TaskParameter[OSPrioHighRdy].TaskPrermpTime, TaskParameter[OSPrioHighRdy].TaskDly);
         }
         else {
-            //printf("RMT=%d\t", TaskParameter[OSPrioHighRdy].TaskRemainTime);
             printf("%2d  Preemption\ttask(%2d)(%2d)\t", OSTimeGet(), TaskParameter[OSPrioHighRdy].TaskID, TaskParameter[OSPrioHighRdy].TaskCount);
             printf("task(%2d)(%2d)\n", TaskParameter[OSPrioHighRdy - 1].TaskID, TaskParameter[OSPrioHighRdy - 1].TaskCount);
         }
