@@ -1085,17 +1085,12 @@ void  OSTimeTick(void)
                 }
             }
             currentTime = OSTimeGet();
-            if (ptcb == OSTCBCur && ptcb->OSTCBExtPtr && ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime > 0)  /* Check if this is the currently running task */
+            if (ptcb == OSTCBCur && ptcb->OSTCBExtPtr && ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime > 0) 
             {
-                (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime)--;                        	 		       /* Decrement compTime counter for the running task */
-                if ((((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime) == 0) {
-                    OSTCBCur->CompletedFlag = 1;
-                }
+                (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime)--;                        	 		      
+                if ((((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime) == 0) OSTCBCur->CompletedFlag = 1;
             }
-            if (ptcb->OSTCBPrio >= 1 && ptcb->OSTCBPrio <= 3 && currentTime >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine && ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime > 0)
-            {
-                missTask = ptcb->OSTCBPrio;
-            }
+            if (ptcb->OSTCBPrio >= 1 && ptcb->OSTCBPrio <= 3 && currentTime >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine && ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime > 0) missTask = ptcb->OSTCBPrio;
             ptcb = ptcb->OSTCBNext;                        /* Point at next TCB in TCB list                */
             OS_EXIT_CRITICAL();
         }
