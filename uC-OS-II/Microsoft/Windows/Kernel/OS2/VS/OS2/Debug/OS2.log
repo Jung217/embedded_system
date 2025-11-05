@@ -1,8 +1,8 @@
 ﻿  os_core.c
-C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(639,5): warning C4013: 'OSInitHookEnd' 未定義; 假設 extern 傳回整數
-C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(1071,13): warning C4013: 'exit' 未定義; 假設 extern 傳回整數
-C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(2337,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
-C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(2338,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
-C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(2339,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
-  LINK : 最後的累加連結找不到或未建置 C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe，正在執行完整連結
-  OS2.vcxproj -> C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe
+C:\Users\alex2\Desktop\vsCode\RTOS_M11407509_PA1\Micrium\Software\uCOS-II\Source\os_core.c(642,5): warning C4013: 'OSInitHookEnd' 未定義; 假設 extern 傳回整數
+C:\Users\alex2\Desktop\vsCode\RTOS_M11407509_PA1\Micrium\Software\uCOS-II\Source\os_core.c(732,29): warning C4013: 'LOG_print' 未定義; 假設 extern 傳回整數
+C:\Users\alex2\Desktop\vsCode\RTOS_M11407509_PA1\Micrium\Software\uCOS-II\Source\os_core.c(1040,13): warning C4013: 'exit' 未定義; 假設 extern 傳回整數
+C:\Users\alex2\Desktop\vsCode\RTOS_M11407509_PA1\Micrium\Software\uCOS-II\Source\os_core.c(2262,16): warning C4477: 'printf' : 格式字串 '%x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'os_tcb *'
+C:\Users\alex2\Desktop\vsCode\RTOS_M11407509_PA1\Micrium\Software\uCOS-II\Source\os_core.c(2263,16): warning C4477: 'printf' : 格式字串 '%x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'OS_TCB *'
+C:\Users\alex2\Desktop\vsCode\RTOS_M11407509_PA1\Micrium\Software\uCOS-II\Source\os_core.c(2264,16): warning C4477: 'printf' : 格式字串 '%x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'os_tcb *'
+  OS2.vcxproj -> C:\Users\alex2\Desktop\vsCode\RTOS_M11407509_PA1\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe

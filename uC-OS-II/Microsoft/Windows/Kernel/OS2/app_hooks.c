@@ -44,6 +44,32 @@
 *********************************************************************************************************
 */
 
+#define LOG_CONSOLE 1
+#define LOG_FILE    2
+#define LOG_BOTH    3
+
+void LOG_print(INT8U LOG_type, char* outfile,
+    _In_z_ _Printf_format_string_ char const* _Format,
+    ...) {
+    va_list _Arglist;
+    va_start(_Arglist, _Format);
+
+    if (LOG_type & LOG_CONSOLE)
+        vprintf(_Format, _Arglist);
+
+    if (LOG_type & LOG_FILE) {
+        errno_t Output_err;
+        va_end(_Arglist);
+        va_start(_Arglist, _Format);
+
+        if ((Output_err = fopen_s(&Output_fp, OUTPUT_FILE_NAME, "a")) == 0) {
+            vfprintf(Output_fp, _Format, _Arglist);
+            fclose(Output_fp);
+        }
+    }
+
+    va_end(_Arglist);
+}
 
 void OutFileInit() {
     if ((Output_err = fopen_s(&Output_fp, OUTPUT_FILE_NAME, "w") == 0))
@@ -82,14 +108,13 @@ void InputFile() {
             else if (i == 1)
                 TaskParameter[j].TaskArriveTime = TaskInfo[i];
             else if (i == 2) {
-                TaskParameter[j].TaskExecutionTIme = TaskInfo[i];
+                TaskParameter[j].TaskExecutionTime = TaskInfo[i];
                 TaskParameter[j].TaskRemainTime = TaskInfo[i];
             }
             else if (i == 3) {
                 TaskParameter[j].TaskPeriodic = TaskInfo[i]; 
-                TaskParameter[j].TaskDeadline = TaskInfo[i];
             }
-
+            TaskParameter[j].TaskDeadLine = TaskParameter[j].TaskArriveTime + TaskParameter[j].TaskPeriodic;
             i++;
         }
 
@@ -277,6 +302,8 @@ void  App_TaskSwHook(void)
 #if (APP_CFG_PROBE_OS_PLUGIN_EN > 0) && (OS_PROBE_HOOKS_ENs > 0)
     OSProbe_TaskSwHook();
 #endif
+
+
 }
 
 

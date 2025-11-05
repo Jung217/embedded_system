@@ -70,26 +70,23 @@ extern "C" {
 #define OUTPUT_FILE_NAME "./Output.txt"
 #define MAX 20
 #define INFO 4
-#define MAX_PRINTF_BUFFER   16
 
-#define RM 1
-#define FIFO 0
+#define RM 0
+#define FIFO 1
 #define ALGORITHM RM
 
     typedef struct task_para_set {
         INT16U TaskID;
         INT16U TaskArriveTime;
-        INT16U TaskExecutionTIme;
+        INT16U TaskExecutionTime;
         INT16U TaskPeriodic;
         INT16U TaskNumber;
         INT16U TaskPriority;
-        INT16U TaskCount;
-        INT16U TaskStartTime;
-        INT16U TaskRemainTime;
-        INT16U TaskDeadline;
-        INT16U TaskDuration;
-        INT16U TaskPrermpTime;
-        INT16U TaskDly;
+        INT16U TaskCount; 
+        INT16U TaskRemainTime; 
+        INT16U TaskDeadLine;
+        INT16U TaskResponseTime; 
+        INT16U TaskDelay;
     } task_para_set;
 
     int TASK_NUMBER;

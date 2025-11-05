@@ -40,6 +40,9 @@
 #include <stdio.h>
 #endif
 
+extern missTask;
+extern missDeadline;
+
 /*
 *********************************************************************************************************
 *                                      PRIORITY RESOLUTION TABLE
@@ -705,113 +708,79 @@ void  OSIntExit(void)
     OS_CPU_SR  cpu_sr = 0u;
 #endif
     if (OSRunning == OS_TRUE) {
+
+        int currentTime;
+        currentTime = OSTimeGet();
+
         OS_ENTER_CRITICAL();
         if (OSIntNesting > 0u) {                           /* Prevent OSIntNesting cur wrapping       */
             OSIntNesting--;
         }
         if (OSIntNesting == 0u) {                          /* Reschedule only if all ISRs complete ... */
             if (OSLockNesting == 0u) {                     /* ... and not locked.                      */
+#if ALGORITHM == RM
                 OS_SchedNew();
                 OSTCBHighRdy = OSTCBPrioTbl[OSPrioHighRdy];
+#endif
                 if (OSPrioHighRdy != OSPrioCur) {          /* No Ctx Sw if current task is highest rdy */
 #if OS_TASK_PROFILE_EN > 0u
                     OSTCBHighRdy->OSTCBCtxSwCtr++;         /* Inc. # of context switches to this task  */
 #endif
                     OSCtxSwCtr++;                          /* Keep track of the number of ctx switches */
-
-                    if (OSTCBCur->CompletedFlag != 1) {
+                    if (OSTCBCur->CompletedFlag != 1 && missDeadline == 0) {
                         if (OSTCBCur->OSTCBPrio != 63) {
-                            printf("%2d  Preemption\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t\n", 
-                                OSTimeGet(), 
+                            LOG_print(3, "./Output.txt", "%2d  Preemption\ttask(% 2d)(% 2d)\ttask(% 2d)(% 2d)\t\n",
+                                OSTimeGet(),
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount
                             );
-                            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-                            {
-                                fprintf(Output_fp, "%2d  Preemption\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t\n",
-                                    OSTimeGet(),
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
-                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
-                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount
-                                );
-                                fclose(Output_fp);
-                            }
                         }
                         else {
-                            printf("%2d  Preemption\ttask(%2d)\ttask(%2d)(%2d)\t\n", 
-                                OSTimeGet(), 
-                                OSTCBCur->OSTCBPrio,
+                            LOG_print(3, "./Output.txt", "%2d  Preemption\ttask(%2d)\ttask(%2d)(%2d)\t\n",
+                                OSTimeGet(),
+                                63,
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount
                             );
-                            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-                            {
-                                fprintf(Output_fp, "%2d  Preemption\ttask(%2d)\ttask(%2d)(%2d)\t\n",
-                                    OSTimeGet(),
-                                    OSTCBCur->OSTCBPrio,
-                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
-                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount
-                                );
-                                fclose(Output_fp);
-                            }
                         }
                     }
-                    if (OSTCBCur->CompletedFlag == 1) {
+                    if (OSTCBCur->CompletedFlag == 1 && missDeadline == 0) {
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime = currentTime - ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskArriveTime + 1;
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskArriveTime += ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPeriodic;
+
+                        if (currentTime >= ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskArriveTime) ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay = 0;
+                        else ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay = ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskArriveTime - currentTime;
+
                         if (OSTCBHighRdy->OSTCBPrio != 63) {
-                            printf("%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
+                            LOG_print(3, "./Output.txt", "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\t\n",
                                 OSTimeGet(),
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
                                 ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration+1,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime+1,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly+1
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime - 1,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime - ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskExecutionTime - 1,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay
                             );
-                            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-                            {
-                                fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
-                                    OSTimeGet(),
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
-                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
-                                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration + 1,
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime + 1,
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly + 1
-                                );
-                                fclose(Output_fp);
-                            }
+
+                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++;
                         }
                         else {
-                            printf("%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n",
-                                OSTimeGet(),
+                            LOG_print(3, "./Output.txt", "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n", OSTimeGet(),
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
                                 ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
-                                OSTCBHighRdy->OSTCBPrio,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration+1,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime+1,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly+1
+                                63,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime - 1,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime - ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskExecutionTime - 1,
+                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay
                             );
-                            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-                            {
-                                fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n",
-                                    OSTimeGet(),
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
-                                    OSTCBHighRdy->OSTCBPrio,
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration + 1,
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime + 1,
-                                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly + 1
-                                );
-                                fclose(Output_fp);
-                            }
+
+                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++;
                         }
-                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++;
                         OSTCBCur->CompletedFlag = 0;
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskArriveTime -= ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPeriodic;
                     }
 
 #if OS_TASK_CREATE_EXT_EN > 0u
@@ -1064,7 +1033,7 @@ void  OSTimeTick(void)
     OS_EXIT_CRITICAL();
 #endif
     if (OSRunning == OS_TRUE) {
-        currentTime = OSTimeGet();
+
 #if OS_TICK_STEP_EN > 0u
         if (OSTimeGet() > SYSTEM_END_TIME) {
             OSRunning = OS_FALSE;
@@ -1114,6 +1083,18 @@ void  OSTimeTick(void)
                         OS_TRACE_TASK_READY(ptcb);
                     }
                 }
+            }
+            currentTime = OSTimeGet();
+            if (ptcb == OSTCBCur && ptcb->OSTCBExtPtr && ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime > 0)  /* Check if this is the currently running task */
+            {
+                (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime)--;                        	 		       /* Decrement compTime counter for the running task */
+                if ((((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime) == 0) {
+                    OSTCBCur->CompletedFlag = 1;
+                }
+            }
+            if (ptcb->OSTCBPrio >= 1 && ptcb->OSTCBPrio <= 3 && currentTime >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine && ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime > 0)
+            {
+                missTask = ptcb->OSTCBPrio;
             }
             ptcb = ptcb->OSTCBNext;                        /* Point at next TCB in TCB list                */
             OS_EXIT_CRITICAL();
@@ -1829,58 +1810,34 @@ void  OS_Sched(void)
                 OSTCBHighRdy->OSTCBCtxSwCtr++;         /* Inc. # of context switches to this task      */
 #endif
                 OSCtxSwCtr++;                          /* Increment context switch counter             */
-                if (OSTCBCur->CompletedFlag == 1) {
+                if (OSTCBCur->CompletedFlag == 1 && missDeadline == 0) {
                     if (OSTCBHighRdy->OSTCBPrio != 63) {
-                        printf("%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n", 
+                        LOG_print(3, "./Output.txt","%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\t\n", 
                             OSTimeGet(), 
                             ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
                             ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
                             ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
                             ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
-                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration,
-                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime,
-                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
+                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime,
+                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime - ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskExecutionTime,
+                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay
                         );
-                        if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-                        {
-                            fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
-                                OSTimeGet(),
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
-                                ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
-                                ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
-                            );
-                            fclose(Output_fp);
-                        }
+
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++;
                     }
                     else {
-                        printf("%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n", 
+                        LOG_print(3, "./Output.txt","%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n", 
                             OSTimeGet(), 
                             ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
                             ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
-                            OSTCBHighRdy->OSTCBPrio,
-                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration,
-                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime,
-                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
+                            63,
+                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime,
+                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime - ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskExecutionTime,
+                            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay
                         );
-                        if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-                        {
-                            fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)\t%d\t%d\t%d\n",
-                                OSTimeGet(),
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
-                                OSTCBHighRdy->OSTCBPrio,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime,
-                                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
-                            );
-                            fclose(Output_fp);
-                        }
+
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++;
                     }
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++;
                     OSTCBCur->CompletedFlag = 0;
                 }
                 
@@ -1941,39 +1898,6 @@ static  void  OS_SchedNew(void)
     else {
         OSPrioHighRdy = (INT8U)((y << 4u) + OSUnMapTbl[(OS_PRIO)(*ptbl >> 8u) & 0xFFu] + 8u);
     }
-#endif
-
-#if ALGORITHM==RM
-    /*INT8U i;
-    OS_TCB* ptcb;
-    task_para_set* ptask;
-
-    OSTCBHighRdy = NULL;
-
-    for (i = 0; i < TASK_NUMBER; i++) {
-        ptcb = &OSTCBTbl[i];
-        if (ptcb->OSTCBPrio == OS_TASK_IDLE_PRIO) continue;
-        if (ptcb->OSTCBPrio == 63) continue;
-        if (ptcb->OSTCBStat == 0xFF) continue;
-
-        ptask = (task_para_set*)ptcb->OSTCBExtPtr;
-
-        if ((ptcb->OSTCBStat & OS_STAT_RDY) == 0 || ptcb->OSTCBStat == OS_STAT_SUSPEND) continue;
-
-        if (ptask->TaskRemainTime > 0) {
-            OSTCBHighRdy = ptcb;
-            OSPrioHighRdy = ptcb->OSTCBPrio;
-            return;
-        }
-
-        if (ptcb->OSTCBStat & OS_STAT_RDY) {
-            OSTCBHighRdy = ptcb;
-            OSPrioHighRdy = ptcb->OSTCBPrio;
-            return;
-        }
-    }*/
-#endif
-#if ALGORITHM==FIFO
 #endif
 }
 
@@ -2333,11 +2257,12 @@ INT8U  OS_TCBInit(INT8U    prio,
         OSRdyTbl[ptcb->OSTCBY] |= ptcb->OSTCBBitX;
         OSTaskCtr++;                                       /* Increment the #tasks counter             */
         OS_TRACE_TASK_READY(ptcb);
-        printf("------After Task[%3.1d] begin linked------\n", ptcb->OSTCBPrio);
-        printf("Previous TCB point to address %6x\n", (void*)ptcb->OSTCBPrev);
-        printf("Current  TCB point to address %6x\n", (void*)ptcb);
-        printf("Next     TCB point to address %6x\n\n", (void*)ptcb->OSTCBNext);
         OS_EXIT_CRITICAL();
+        printf("------After Task[%d] begin linked------\n", ptcb->OSTCBPrio);
+        printf("Previous TCB Point to address %x\n", ptcb->OSTCBPrev);
+        printf("Current  TCB Point to address %x\n", ptcb);
+        printf("Next     TCB Point to address %x\n", ptcb->OSTCBNext);   
+        printf("\n\n");
         return (OS_ERR_NONE);
     }
     OS_EXIT_CRITICAL();

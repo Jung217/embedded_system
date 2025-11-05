@@ -1,4 +1,5 @@
 
+
 /*
 *********************************************************************************************************
 *                                            EXAMPLE CODE
@@ -34,13 +35,14 @@
 *                                            INCLUDE FILES
 *********************************************************************************************************
 */
-
+#define _CRT_SECURE_NO_WARNINGS
 #include  <cpu.h>
 #include  <lib_mem.h>
 #include  <os.h>
 
 #include  "app_cfg.h"
 #define TASK_STACKSIZE 2048
+
 
 
 
@@ -87,98 +89,67 @@ static  void  StartupTask(void* p_arg);
 
 static void task(void* p_arg);
 
+int missDeadline = 0;
+int missTask;
 void task(void* p_arg) {
     task_para_set* task_data = (task_para_set*)p_arg;
-    int NextStartTime = task_data->TaskArriveTime;
+
     int timeTag;
     timeTag = OSTimeGet();
-    if (NextStartTime > timeTag) OSTimeDly(NextStartTime - timeTag);
 
-    while (1) {
-        task_data->TaskDuration = 0;
-        task_data->TaskPrermpTime = 0;
-        task_data->TaskStartTime = OSTimeGet();
-        // task_data->TaskRemainTime = task_data->TaskExecutionTIme;
-        for (int i = 0; i < task_data->TaskExecutionTIme; i++) {
-            printf("%2d  task(%2d) is running\t\n", OSTime, task_data->TaskID);
-            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-            {
-                fprintf(Output_fp, "%2d  task(%2d) is running\t\n", OSTime, task_data->TaskID);
-                fclose(Output_fp);
-            }
-            //task_data->RemainTime -= 1;
+    if (task_data->TaskArriveTime > timeTag) OSTimeDly(task_data->TaskArriveTime - timeTag);
+
+    while (missDeadline == 0) {
+        while (task_data->TaskRemainTime > 0 && missDeadline == 0) {
+            if (missDeadline == 1) break;
+
+            LOG_print(3, "./Output.txt", "%2d  task(%2d) is running\t\n", OSTime, task_data->TaskID);
             timeTag = OSTimeGet();
 
-            if (i == task_data->TaskExecutionTIme - 1) {
-                OSTCBCur->CompletedFlag = 1;
-                task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
-                task_data->TaskPrermpTime = task_data->TaskDuration - task_data->TaskExecutionTIme;
+            while (OSTimeGet() == timeTag) {
+                if (missTask != 0 && missDeadline == 0)
+                {
+                    missDeadline = 1;
+                    LOG_print(3, "./Output.txt", "%2d  Missdeadline\ttask(%2d)(%2d)\t-------------------\n", OSTime, missTask, TaskParameter[missTask].TaskCount);
+                    break;
+                }
             }
-            while (OSTimeGet() == timeTag) {}
         }
+        if (missDeadline==1) break;
 
-        task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
-        task_data->TaskPrermpTime = task_data->TaskDuration - task_data->TaskExecutionTIme;
-        NextStartTime += task_data->TaskPeriodic;
+        OS_ENTER_CRITICAL();
         timeTag = OSTimeGet();
 
-        if (timeTag > NextStartTime) task_data->TaskDly = 0;
-        else task_data->TaskDly = NextStartTime - timeTag;
+        task_data->TaskDeadLine += task_data->TaskPeriodic;
+        task_data->TaskResponseTime = timeTag - task_data->TaskArriveTime;
+        task_data->TaskArriveTime += task_data->TaskPeriodic;
 
-        OSTimeDly(task_data->TaskDly);
-     
-        if (OSTCBHighRdy == OSTCBCur && OSTCBCur->CompletedFlag == 1) {
-            ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount += 1;
-            printf("%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
-                OSTimeGet(),
-                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
-                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
-                ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
-                ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
-                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration+1,
-                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime+1,
-                ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
-            );
-            if ((Output_err = fopen_s(&Output_fp, "./Output.txt", "a")) == 0)
-            {
-                fprintf(Output_fp, "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\n",
+        if (timeTag >= task_data->TaskArriveTime) task_data->TaskDelay = 0;
+        else task_data->TaskDelay = task_data->TaskArriveTime - timeTag;
+
+        task_data->TaskRemainTime = task_data->TaskExecutionTime;
+        OS_EXIT_CRITICAL();
+
+        OSTimeDly(task_data->TaskDelay);
+
+        if (OSTCBCur->CompletedFlag == 1 && ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay == 0) {
+            if (OSTCBHighRdy == OSTCBCur) {
+                LOG_print(3, "./Output.txt","%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\t\n", 
                     OSTimeGet(),
                     ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount,
+                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++,
                     ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
                     ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDuration + 1,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskPrermpTime + 1,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDly
+                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime,
+                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime - ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskExecutionTime, 
+                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay
                 );
-                fclose(Output_fp);
+                OSTCBCur->CompletedFlag = 0;
             }
-            OSTCBCur->CompletedFlag = 0;
         }
     }
+    while (1) {}
 }
-/*void task(void* p_arg) { // with RM
-    task_para_set* task_data = p_arg;
-
-    while (1) {
-        task_data->TaskRemainTime = task_data->TaskExecutionTIme;
-        task_data->TaskStartTime = OSTimeGet();
-        task_data->TaskDuration = 0;
-        task_data->TaskPrermpTime = 0;
-
-        while (task_data->TaskRemainTime > 0) {
-            printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
-            task_data->TaskRemainTime -= 1;
-            OSTimeDly(1);
-        }
-
-        task_data->TaskCount += 1;
-        task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
-        task_data->TaskDly = task_data->TaskPeriodic - task_data->TaskDuration;
-
-        if (task_data->TaskDly > 0) OSTimeDly(task_data->TaskDly);
-    }
-}*/
 
 
 int  main(void)
@@ -202,19 +173,31 @@ int  main(void)
 
     Task_STK = malloc(TASK_NUMBER * sizeof(int*));
 
-    for (int n = 0; n < TASK_NUMBER; n++) 
+
+    for (int a = 0; a < TASK_NUMBER - 1; a++) {
+        for (int b = a + 1; b < TASK_NUMBER; b++) {
+            if (TaskParameter[a].TaskPeriodic > TaskParameter[b].TaskPeriodic) {
+                task_para_set temp = TaskParameter[a];
+                TaskParameter[a] = TaskParameter[b];
+                TaskParameter[b] = temp;
+            }
+        }
+    }
+
+    for (int i = 0; i < TASK_NUMBER; i++) TaskParameter[i].TaskPriority = i + 1;
+
+    for (int n = 0; n < TASK_NUMBER; n++)
     {
         Task_STK[n] = malloc(TASK_STACKSIZE * sizeof(int));
         OSTaskCreateExt(task,
             &TaskParameter[n],
             &Task_STK[n][TASK_STACKSIZE - 1],
-            TaskParameter[n].TaskPriority+1,
+            TaskParameter[n].TaskPriority,
             TaskParameter[n].TaskID,
             &Task_STK[n][0],
             TASK_STACKSIZE,
             &TaskParameter[n],
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
-
 
     }
 
@@ -225,12 +208,13 @@ int  main(void)
 #endif
     ptcb = OSTCBList;
     OSTimeSet(0);
-
-    printf("==========TCB linked list==========\n");
-    printf("Task \t Prev_TCB_addr   TCB_addr   Next_TCB_addr\n");
-    for (int i = TASK_NUMBER;i >= 0;i--) if (OSTCBTbl[i].OSTCBPrio != 0) printf("%2d \t %6x \t %6x \t %6x\n", OSTCBTbl[i].OSTCBPrio, OSTCBTbl[i].OSTCBPrev, &OSTCBTbl[i], OSTCBTbl[i].OSTCBNext);
-    printf("\n");//OS_MAX_TASKS + OS_N_SYS_TASKS
-
+    printf("==================TCB Linked List=================\n ");
+    printf("Task\tPrev_tcb_addr\tTCB_address\tNext_tcb_addr\t\n");
+    while (ptcb != 0) {
+        printf("%d\t%10x\t%10x\t%10x\t\n", ptcb->OSTCBPrio, ptcb->OSTCBPrev, ptcb, ptcb->OSTCBNext);
+        ptcb = ptcb->OSTCBNext;
+    }
+    printf("\n\n");
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */
 
 
@@ -277,3 +261,5 @@ static  void  StartupTask(void* p_arg)
         APP_TRACE_DBG(("Time: %d\n\r", OSTimeGet()));
     }
 }
+
+
