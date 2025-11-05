@@ -1,18 +1,15 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\VS\\",
+  "WorkspaceRootPath": "C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\VS\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{5129D7B8-8E33-4F0F-9072-FC39426C859A}|OS2.vcxproj|C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{5129D7B8-8E33-4F0F-9072-FC39426C859A}|OS2.vcxproj|C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\main.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5129D7B8-8E33-4F0F-9072-FC39426C859A}|OS2.vcxproj|C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Source\\os_core.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{5129D7B8-8E33-4F0F-9072-FC39426C859A}|OS2.vcxproj|C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Source\\os_core.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{5129D7B8-8E33-4F0F-9072-FC39426C859A}|OS2.vcxproj|C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\app_hooks.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{5129D7B8-8E33-4F0F-9072-FC39426C859A}|OS2.vcxproj|C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Source\\ucos_ii.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{5129D7B8-8E33-4F0F-9072-FC39426C859A}|OS2.vcxproj|C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Ports\\Win32\\Visual Studio\\os_cpu_c.c||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -28,56 +25,39 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "main.c",
-              "DocumentMoniker": "C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\main.c",
+              "DocumentMoniker": "C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\main.c",
               "RelativeDocumentMoniker": "..\\main.c",
-              "ToolTip": "C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\main.c",
+              "ToolTip": "C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\main.c",
               "RelativeToolTip": "..\\main.c",
-              "ViewState": "AgIAAH4AAAAAAAAAAAAcwJYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAMwAAAAAAAAAAAAAANMAAAAZAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-11-05T18:28:30.666Z",
-              "IsPinned": true,
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "app_hooks.c",
-              "DocumentMoniker": "C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\app_hooks.c",
-              "RelativeDocumentMoniker": "..\\app_hooks.c",
-              "ToolTip": "C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Microsoft\\Windows\\Kernel\\OS2\\app_hooks.c",
-              "RelativeToolTip": "..\\app_hooks.c",
-              "ViewState": "AgIAAFQAAAAAAAAAAAAAADABAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-11-05T18:28:24.06Z",
-              "IsPinned": true,
+              "WhenOpened": "2025-11-05T20:10:48.188Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "os_core.c",
-              "DocumentMoniker": "C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Source\\os_core.c",
+              "DocumentMoniker": "C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Source\\os_core.c",
               "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Micrium\\Software\\uCOS-II\\Source\\os_core.c",
-              "ToolTip": "C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Source\\os_core.c",
+              "ToolTip": "C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Source\\os_core.c",
               "RelativeToolTip": "..\\..\\..\\..\\..\\Micrium\\Software\\uCOS-II\\Source\\os_core.c",
-              "ViewState": "AgIAAPIGAAAAAAAAAAAkwBQHAABFAAAAAAAAAA==",
+              "ViewState": "AgIAAMwIAAAAAAAAAAAAANYIAABRAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
-              "WhenOpened": "2025-11-05T18:28:20.479Z",
-              "IsPinned": true,
+              "WhenOpened": "2025-11-05T20:08:31.729Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ucos_ii.h",
-              "DocumentMoniker": "C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Source\\ucos_ii.h",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Micrium\\Software\\uCOS-II\\Source\\ucos_ii.h",
-              "ToolTip": "C:\\Users\\alex2\\Desktop\\vsCode\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Source\\ucos_ii.h",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\Micrium\\Software\\uCOS-II\\Source\\ucos_ii.h",
-              "ViewState": "AgIAAEkAAAAAAAAAAAAkwEgAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-11-05T18:28:14.717Z",
-              "IsPinned": true,
+              "DocumentIndex": 2,
+              "Title": "os_cpu_c.c",
+              "DocumentMoniker": "C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Ports\\Win32\\Visual Studio\\os_cpu_c.c",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Micrium\\Software\\uCOS-II\\Ports\\Win32\\Visual Studio\\os_cpu_c.c",
+              "ToolTip": "C:\\Users\\alex2\\Desktop\\RTOS_M11407509_PA1\\Micrium\\Software\\uCOS-II\\Ports\\Win32\\Visual Studio\\os_cpu_c.c",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\Micrium\\Software\\uCOS-II\\Ports\\Win32\\Visual Studio\\os_cpu_c.c",
+              "ViewState": "AgIAAGcCAAAAAAAAAAAkwHICAABPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000423|",
+              "WhenOpened": "2025-11-05T20:06:35.667Z",
               "EditorCaption": ""
             }
           ]

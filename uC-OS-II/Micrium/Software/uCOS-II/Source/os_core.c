@@ -1899,6 +1899,38 @@ static  void  OS_SchedNew(void)
         OSPrioHighRdy = (INT8U)((y << 4u) + OSUnMapTbl[(OS_PRIO)(*ptbl >> 8u) & 0xFFu] + 8u);
     }
 #endif
+#if ALGORITHM == RM
+    /*INT8U i;
+    OS_TCB* ptcb;
+    task_para_set* ptask;
+
+    OSTCBHighRdy = NULL;
+
+    for (i = 0; i < TASK_NUMBER; i++) {
+        ptcb = &OSTCBTbl[i];
+        if (ptcb->OSTCBPrio == OS_TASK_IDLE_PRIO) continue;
+        if (ptcb->OSTCBPrio == 63) continue;
+        if (ptcb->OSTCBStat == 0xFF) continue;
+
+        ptask = (task_para_set*)ptcb->OSTCBExtPtr;
+
+        if ((ptcb->OSTCBStat & OS_STAT_RDY) == 0 || ptcb->OSTCBStat == OS_STAT_SUSPEND) continue;
+
+        if (ptask->TaskRemainTime > 0) {
+            OSTCBHighRdy = ptcb;
+            OSPrioHighRdy = ptcb->OSTCBPrio;
+            return;
+        }
+
+        if (ptcb->OSTCBStat & OS_STAT_RDY) {
+            OSTCBHighRdy = ptcb;
+            OSPrioHighRdy = ptcb->OSTCBPrio;
+            return;
+        }
+    }*/
+#endif
+#if ALGORITHM == FIFO
+#endif
 }
 
 
@@ -2257,12 +2289,11 @@ INT8U  OS_TCBInit(INT8U    prio,
         OSRdyTbl[ptcb->OSTCBY] |= ptcb->OSTCBBitX;
         OSTaskCtr++;                                       /* Increment the #tasks counter             */
         OS_TRACE_TASK_READY(ptcb);
+        printf("------After Task[%2d] begin linked------\n", ptcb->OSTCBPrio);
+        printf("Previous  TCB point to address %6x\n", (void*)ptcb->OSTCBPrev);
+        printf("Current   TCB point to address %6x\n", (void*)ptcb);
+        printf("Next      TCB point to address %6x\n\n", (void*)ptcb->OSTCBNext);
         OS_EXIT_CRITICAL();
-        printf("------After Task[%d] begin linked------\n", ptcb->OSTCBPrio);
-        printf("Previous TCB Point to address %x\n", ptcb->OSTCBPrev);
-        printf("Current  TCB Point to address %x\n", ptcb);
-        printf("Next     TCB Point to address %x\n", ptcb->OSTCBNext);   
-        printf("\n\n");
         return (OS_ERR_NONE);
     }
     OS_EXIT_CRITICAL();

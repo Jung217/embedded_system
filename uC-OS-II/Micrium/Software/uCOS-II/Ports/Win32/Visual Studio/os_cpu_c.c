@@ -624,8 +624,7 @@ void  OSTCBInitHook (OS_TCB  *p_tcb)
 
 #if (OS_MSG_TRACE > 0u)
 
-    OS_Printf("Task[%3.1d] created, TCB Address %x\n", p_tcb->OSTCBPrio, p_tcb);
-    //printf("------After Task[%d] begin linked------\n", p_tcb->OSTCBPrio);
+    OS_Printf("Task[%3.1d] created, TCB Address %6x\n", p_tcb->OSTCBPrio, (void*)p_tcb);
 
 
 #endif

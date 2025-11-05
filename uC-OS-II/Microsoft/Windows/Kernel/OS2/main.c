@@ -151,6 +151,29 @@ void task(void* p_arg) {
     while (1) {}
 }
 
+/*void task(void* p_arg) { // with RM
+    task_para_set* task_data = p_arg;
+
+    while (1) {
+        task_data->TaskRemainTime = task_data->TaskExecutionTIme;
+        task_data->TaskStartTime = OSTimeGet();
+        task_data->TaskDuration = 0;
+        task_data->TaskPrermpTime = 0;
+
+        while (task_data->TaskRemainTime > 0) {
+            printf("%2d  task(%2d) is running\n", OSTimeGet(), task_data->TaskID);
+            task_data->TaskRemainTime -= 1;
+            OSTimeDly(1);
+        }
+
+        task_data->TaskCount += 1;
+        task_data->TaskDuration = OSTimeGet() - task_data->TaskStartTime;
+        task_data->TaskDly = task_data->TaskPeriodic - task_data->TaskDuration;
+
+        if (task_data->TaskDly > 0) OSTimeDly(task_data->TaskDly);
+    }
+}*/
+
 
 int  main(void)
 {
@@ -208,13 +231,12 @@ int  main(void)
 #endif
     ptcb = OSTCBList;
     OSTimeSet(0);
-    printf("==================TCB Linked List=================\n ");
-    printf("Task\tPrev_tcb_addr\tTCB_address\tNext_tcb_addr\t\n");
-    while (ptcb != 0) {
-        printf("%d\t%10x\t%10x\t%10x\t\n", ptcb->OSTCBPrio, ptcb->OSTCBPrev, ptcb, ptcb->OSTCBNext);
-        ptcb = ptcb->OSTCBNext;
-    }
-    printf("\n\n");
+
+    printf("==========TCB linked list==========\n");
+    printf("Task \t Prev_TCB_addr   TCB_addr   Next_TCB_addr\n");
+    for (int i = TASK_NUMBER;i >= 0;i--) if (OSTCBTbl[i].OSTCBPrio != 0) printf("%2d \t %6x \t %6x \t %6x\n", OSTCBTbl[i].OSTCBPrio, OSTCBTbl[i].OSTCBPrev, &OSTCBTbl[i], OSTCBTbl[i].OSTCBNext);
+    printf("\n");
+
     OSStart();                                                  /* Start multitasking (i.e. give control to uC/OS-II)   */
 
 
