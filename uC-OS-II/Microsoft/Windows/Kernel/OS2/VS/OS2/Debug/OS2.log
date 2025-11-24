@@ -1,2 +1,31 @@
-﻿  os_time.c
+﻿  os_cpu_c.c
+  os_core.c
+  os_dbg_r.c
+  os_flag.c
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(642,5): warning C4013: 'OSInitHookEnd' 未定義; 假設 extern 傳回整數
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(730,29): warning C4013: 'LOG_print' 未定義; 假設 extern 傳回整數
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(1038,13): warning C4013: 'exit' 未定義; 假設 extern 傳回整數
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(2324,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(2325,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Micrium\Software\uCOS-II\Source\os_core.c(2326,16): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 1 的類型為 'void *'
+  os_mbox.c
+  os_mem.c
+  os_mutex.c
+  os_q.c
+  os_sem.c
+  os_task.c
+  os_time.c
+  os_tmr.c
+  app_hooks.c
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\app_hooks.c(102,27): warning C4013: 'atoi' 未定義; 假設 extern 傳回整數
+  main.c
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\main.c(106,13): warning C4013: 'LOG_print' 未定義; 假設 extern 傳回整數
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\main.c(181,16): warning C4013: 'malloc' 未定義; 假設 extern 傳回整數
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\main.c(181,14): warning C4047: '=': 'OS_STK **' 與 'int' 間接取值的層級不同
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\main.c(198,21): warning C4047: '=': 'OS_STK *' 與 'int' 間接取值的層級不同
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\main.c(202,29): warning C4244: '函式': 將 'INT16U' 轉換為 'INT8U'，由於類型不同，可能導致資料遺失
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\main.c(221,81): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 2 的類型為 'os_tcb *'
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\main.c(221,81): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 3 的類型為 'OS_TCB *'
+C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\main.c(221,81): warning C4477: 'printf' : 格式字串 '%6x' 需要 'unsigned int' 類型的引數，但 variadic 引數 4 的類型為 'os_tcb *'
+  正在產生程式碼...
   OS2.vcxproj -> C:\Users\alex2\Desktop\vsCode\embedded_system\uC-OS-II\Microsoft\Windows\Kernel\OS2\VS\Debug\OS2.exe

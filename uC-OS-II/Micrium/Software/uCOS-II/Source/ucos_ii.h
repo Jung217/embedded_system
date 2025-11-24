@@ -94,6 +94,7 @@ extern "C" {
     int TASK_NUMBER;
     OS_STK** Task_STK;
     task_para_set TaskParameter[OS_MAX_TASKS];
+    task_para_set AperiodicTaskParameter[OS_MAX_TASKS];
     FILE* fp;
     FILE* Output_fp;
     errno_t Output_err;

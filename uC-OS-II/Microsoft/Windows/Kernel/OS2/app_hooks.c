@@ -105,29 +105,67 @@ void InputFile() {
                 TASK_NUMBER++;
                 TaskParameter[j].TaskID = TASK_NUMBER;
             }
-            else if (i == 1)
-                TaskParameter[j].TaskArriveTime = TaskInfo[i];
+            else if (i == 1) TaskParameter[j].TaskArriveTime = TaskInfo[i];
             else if (i == 2) {
                 TaskParameter[j].TaskExecutionTime = TaskInfo[i];
                 TaskParameter[j].TaskRemainTime = TaskInfo[i];
             }
-            else if (i == 3) {
-                TaskParameter[j].TaskPeriodic = TaskInfo[i]; 
-            }
+            else if (i == 3) TaskParameter[j].TaskPeriodic = TaskInfo[i];
             TaskParameter[j].TaskDeadLine = TaskParameter[j].TaskArriveTime + TaskParameter[j].TaskPeriodic;
             i++;
         }
-
         TaskParameter[j].TaskPriority = j;
+        j++;
+    }
+    fclose(fp);
+}
+
+void InputAperiodicjobsFile() {
+    errno_t err;
+
+    if ((err = fopen_s(&fp, APERIODIC_FILE_NAME, "r")) == 0)
+        printf("The file %s was opened\n", APERIODIC_FILE_NAME);
+    else
+        printf("The file %s was not opened\n", APERIODIC_FILE_NAME);
+
+    char str[MAX];
+    char* ptr;
+    char* pTmp = NULL;
+    int TaskInfo[INFO], i;
+    int j = TASK_NUMBER;
+    int AllTaskNumber = j;
+
+    while (!feof(fp)) {
+        i = 0;
+        memset(str, 0, sizeof(str));
+        fgets(str, sizeof(str) - 1, fp);
+        ptr = strtok_s(str, " ", &pTmp);
+
+        while (ptr != NULL) {
+            TaskInfo[i] = atoi(ptr);
+            ptr = strtok_s(NULL, " ", &pTmp);
+            if (i == 0) {
+                AllTaskNumber++;
+                AperiodicTaskParameter[j].TaskID = AllTaskNumber;
+            }
+            else if (i == 1)  AperiodicTaskParameter[j].TaskArriveTime = TaskInfo[i];
+            else if (i == 2) {
+                AperiodicTaskParameter[j].TaskExecutionTime = TaskInfo[i];
+                AperiodicTaskParameter[j].TaskRemainTime = TaskInfo[i];
+            }
+            else if (i == 3) AperiodicTaskParameter[j].TaskDeadLine = TaskInfo[i];
+            //TaskParameter[j].deadline = TaskParameter[j].TaskArriveTime + TaskParameter[j].TaskPeriodic;
+            i++;
+        }
+
+        AperiodicTaskParameter[j].TaskPriority = j;
 
         j++;
     }
-
     fclose(fp);
 
 
 }
-
 
 /*
 *********************************************************************************************************
