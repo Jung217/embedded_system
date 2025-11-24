@@ -1925,44 +1925,34 @@ static  void  OS_SchedNew(void)
 #if ALGORITHM == FIFO
 #endif
 #if ALGORITHM == EDF
-    OS_TCB* ptcb;
-    int earilestDeadline;
-    int timeTag;
-    int highPrio;
-    int highID;
-
-    highPrio = OS_TASK_IDLE_PRIO;
-    earilestDeadline = 65535;
-    highID = 63;
-
-    timeTag = OSTimeGet();
-    ptcb = OSTCBList;
+    OS_TCB* ptcb = OSTCBList;
+    int timeTag = OSTimeGet();
+    int earlyDeadline = 65535;
+    int highPrio = OS_TASK_IDLE_PRIO;
+    int highID = 63;
 
     while (ptcb != NULL && ptcb->OSTCBPrio != OS_TASK_IDLE_PRIO) 
     {
-        if (ptcb->OSTCBExtPtr == NULL) {
-            ptcb = ptcb->OSTCBNext;
-            continue;
-        }
-        if (timeTag >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskArriveTime)
+        if (ptcb->OSTCBExtPtr == NULL) ptcb = ptcb->OSTCBNext; 
+        else if (timeTag >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskArriveTime)
         {
-            if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine < earilestDeadline)
+            if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine < earlyDeadline)
             {
-                earilestDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
+                earlyDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
                 highID = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
                 highPrio = ptcb->OSTCBPrio;
             }
-            else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine == earilestDeadline)
+            else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine == earlyDeadline)
             {
                 if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID < highID)
                 {
-                    earilestDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
+                    earlyDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
                     highID = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
                     highPrio = ptcb->OSTCBPrio;
                 }
                 else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID == highID && ptcb == OSTCBCur)
                 {
-                    earilestDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
+                    earlyDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
                     highID = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
                     highPrio = ptcb->OSTCBPrio;
                 }
