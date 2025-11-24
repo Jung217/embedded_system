@@ -131,22 +131,6 @@ void task(void* p_arg) {
         OS_EXIT_CRITICAL();
 
         OSTimeDly(task_data->TaskDelay);
-
-        if (OSTCBCur->CompletedFlag == 1 && ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay == 0) {
-            if (OSTCBHighRdy == OSTCBCur) {
-                LOG_print(3, "./Output.txt","%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\t\n", 
-                    OSTimeGet(),
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++,
-                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID,
-                    ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime,
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime - ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskExecutionTime, 
-                    ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay
-                );
-                OSTCBCur->CompletedFlag = 0;
-            }
-        }
     }
     while (1) {}
 }

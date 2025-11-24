@@ -718,10 +718,8 @@ void  OSIntExit(void)
         }
         if (OSIntNesting == 0u) {                          /* Reschedule only if all ISRs complete ... */
             if (OSLockNesting == 0u) {                     /* ... and not locked.                      */
-#if ALGORITHM == RM
                 OS_SchedNew();
                 OSTCBHighRdy = OSTCBPrioTbl[OSPrioHighRdy];
-#endif
                 if (OSPrioHighRdy != OSPrioCur) {          /* No Ctx Sw if current task is highest rdy */
 #if OS_TASK_PROFILE_EN > 0u
                     OSTCBHighRdy->OSTCBCtxSwCtr++;         /* Inc. # of context switches to this task  */
@@ -1869,6 +1867,7 @@ void  OS_Sched(void)
 
 static  void  OS_SchedNew(void)
 {
+#if ALGORITHM == RM
 #if OS_LOWEST_PRIO <= 63u                        /* See if we support up to 64 tasks                   */
     INT8U   y;
 
@@ -1894,7 +1893,6 @@ static  void  OS_SchedNew(void)
         OSPrioHighRdy = (INT8U)((y << 4u) + OSUnMapTbl[(OS_PRIO)(*ptbl >> 8u) & 0xFFu] + 8u);
     }
 #endif
-#if ALGORITHM == RM
     /*INT8U i;
     OS_TCB* ptcb;
     task_para_set* ptask;
@@ -1925,6 +1923,54 @@ static  void  OS_SchedNew(void)
     }*/
 #endif
 #if ALGORITHM == FIFO
+#endif
+#if ALGORITHM == EDF
+    OS_TCB* ptcb;
+    int earilestDeadline;
+    int timeTag;
+    int highPrio;
+    int highID;
+
+    highPrio = OS_TASK_IDLE_PRIO;
+    earilestDeadline = 65535;
+    highID = 63;
+
+    timeTag = OSTimeGet();
+    ptcb = OSTCBList;
+
+    while (ptcb != NULL && ptcb->OSTCBPrio != OS_TASK_IDLE_PRIO) 
+    {
+        if (ptcb->OSTCBExtPtr == NULL) {
+            ptcb = ptcb->OSTCBNext;
+            continue;
+        }
+        if (timeTag >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskArriveTime)
+        {
+            if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine < earilestDeadline)
+            {
+                earilestDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
+                highID = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
+                highPrio = ptcb->OSTCBPrio;
+            }
+            else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine == earilestDeadline)
+            {
+                if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID < highID)
+                {
+                    earilestDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
+                    highID = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
+                    highPrio = ptcb->OSTCBPrio;
+                }
+                else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID == highID && ptcb == OSTCBCur)
+                {
+                    earilestDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
+                    highID = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
+                    highPrio = ptcb->OSTCBPrio;
+                }
+            }
+        }
+        ptcb = ptcb->OSTCBNext;
+    }
+    OSPrioHighRdy = highPrio;
 #endif
 }
 

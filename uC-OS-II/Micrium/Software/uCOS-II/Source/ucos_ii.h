@@ -64,16 +64,18 @@ extern "C" {
     */
 
 #include <string.h>
-#define SYSTEM_END_TIME 30
+#define SYSTEM_END_TIME 40
 
 #define INPUT_FILE_NAME "./TaskSet.txt"
 #define OUTPUT_FILE_NAME "./Output.txt"
+#define APERIODIC_FILE_NAME "./Aperiodicjobs.txt"
 #define MAX 20
 #define INFO 4
 
 #define RM 0
 #define FIFO 1
-#define ALGORITHM RM
+#define EDF 2
+#define ALGORITHM EDF
 
     typedef struct task_para_set {
         INT16U TaskID;
