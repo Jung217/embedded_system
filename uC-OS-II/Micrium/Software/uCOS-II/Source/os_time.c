@@ -68,7 +68,7 @@ void  OSTimeDly (INT32U ticks)
     if (OSLockNesting > 0u) {                    /* See if called with scheduler locked                */
         return;
     }
-    if (ticks > 0u) {                            /* 0 means no delay!                                  */
+    if (ticks >= 0u) {                            /* 0 means no delay!                                  */
         OS_ENTER_CRITICAL();
         y            =  OSTCBCur->OSTCBY;        /* Delay current task                                 */
         OSRdyTbl[y] &= (OS_PRIO)~OSTCBCur->OSTCBBitX;
