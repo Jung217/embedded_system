@@ -91,7 +91,7 @@ static void task(void* p_arg);
 static void cus(void* p_arg);
 
 int missDeadline = 0;
-int missTask;
+int missTask=0;
 
 float CUS_SERVER_SIZE;
 int ServerDeadline = 0;

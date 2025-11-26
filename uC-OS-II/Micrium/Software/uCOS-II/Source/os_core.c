@@ -1089,7 +1089,7 @@ void  OSTimeTick(void)
                 (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime)--;                        	 		      
                 if ((((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime) == 0) OSTCBCur->CompletedFlag = 1;
             }
-            if (ptcb->OSTCBPrio >= 1 && ptcb->OSTCBPrio <= 3 && currentTime >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine && ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime > 0) missTask = ptcb->OSTCBPrio;
+            if (ptcb->OSTCBPrio >= 1 && ptcb->OSTCBPrio <= 3 && currentTime >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine && ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime > 0) if (missTask == 0) missTask = ptcb->OSTCBPrio;
             ptcb = ptcb->OSTCBNext;                        /* Point at next TCB in TCB list                */
             OS_EXIT_CRITICAL();
         }
@@ -1951,26 +1951,23 @@ static  void  OS_SchedNew(void)
 
     while (ptcb != NULL && ptcb->OSTCBPrio != OS_TASK_IDLE_PRIO) 
     {
-        if (ptcb->OSTCBStat != OS_STAT_RDY) ptcb = ptcb->OSTCBNext;
-        else if (ptcb->OSTCBExtPtr == NULL) ptcb = ptcb->OSTCBNext; 
-        else if (timeTag >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskArriveTime)
-        {
-            if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine < earlyDeadline)
-            {
+        if (ptcb->OSTCBStat != OS_STAT_RDY || ptcb->OSTCBExtPtr == NULL) {
+            ptcb = ptcb->OSTCBNext;
+			continue;
+        }
+        if (timeTag >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskArriveTime) {
+            if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine < earlyDeadline) {
                 earlyDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
                 highID = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
                 highPrio = ptcb->OSTCBPrio;
             }
-            else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine == earlyDeadline)
-            {
-                if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID < highID)
-                {
+            else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine == earlyDeadline) {
+                if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID < highID) {
                     earlyDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
                     highID = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
                     highPrio = ptcb->OSTCBPrio;
                 }
-                else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID == highID && ptcb == OSTCBCur)
-                {
+                else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID == highID && ptcb == OSTCBCur) {
                     earlyDeadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
                     highID = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
                     highPrio = ptcb->OSTCBPrio;
