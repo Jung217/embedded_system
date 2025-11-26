@@ -1083,6 +1083,7 @@ void  OSTimeTick(void)
                 }
             }
             currentTime = OSTimeGet();
+
             if (ptcb == OSTCBCur && ptcb->OSTCBExtPtr && ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime > 0) 
             {
                 (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskRemainTime)--;                        	 		      
@@ -1798,6 +1799,23 @@ void  OS_Sched(void)
         if (OSLockNesting == 0u) {                     /* ... scheduler is not locked                  */
             OS_SchedNew();
             OSTCBHighRdy = OSTCBPrioTbl[OSPrioHighRdy]; 
+
+            if (OSTCBCur->CompletedFlag == 1 && ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay == 0) {
+                if (OSTCBHighRdy == OSTCBCur) {
+                    LOG_print(3, "./Output.txt", "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\t%d\t\n", 
+                        OSTimeGet(),
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskID, 
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskCount++, 
+                        ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskID, 
+                        ((task_para_set*)(OSTCBHighRdy->OSTCBExtPtr))->TaskCount,
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime,
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskResponseTime - ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskExecutionTime, 
+                        ((task_para_set*)(OSTCBCur->OSTCBExtPtr))->TaskDelay
+                    );
+                    OSTCBCur->CompletedFlag = 0;
+                }
+            }
+
             if (OSPrioHighRdy != OSPrioCur ) {          /* No Ctx Sw if current task is highest rdy     */
 #if OS_TASK_PROFILE_EN > 0u
                 OSTCBHighRdy->OSTCBCtxSwCtr++;         /* Inc. # of context switches to this task      */
@@ -1933,7 +1951,8 @@ static  void  OS_SchedNew(void)
 
     while (ptcb != NULL && ptcb->OSTCBPrio != OS_TASK_IDLE_PRIO) 
     {
-        if (ptcb->OSTCBExtPtr == NULL) ptcb = ptcb->OSTCBNext; 
+        if (ptcb->OSTCBStat != OS_STAT_RDY) ptcb = ptcb->OSTCBNext;
+        else if (ptcb->OSTCBExtPtr == NULL) ptcb = ptcb->OSTCBNext; 
         else if (timeTag >= ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskArriveTime)
         {
             if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine < earlyDeadline)
@@ -2320,10 +2339,10 @@ INT8U  OS_TCBInit(INT8U    prio,
         OSRdyTbl[ptcb->OSTCBY] |= ptcb->OSTCBBitX;
         OSTaskCtr++;                                       /* Increment the #tasks counter             */
         OS_TRACE_TASK_READY(ptcb);
-        printf("------After Task[%2d] begin linked------\n", ptcb->OSTCBPrio);
+        /*printf("------After Task[%2d] begin linked------\n", ptcb->OSTCBPrio);
         printf("Previous  TCB point to address %6x\n", (void*)ptcb->OSTCBPrev);
         printf("Current   TCB point to address %6x\n", (void*)ptcb);
-        printf("Next      TCB point to address %6x\n\n", (void*)ptcb->OSTCBNext);
+        printf("Next      TCB point to address %6x\n\n", (void*)ptcb->OSTCBNext);*/
         OS_EXIT_CRITICAL();
         return (OS_ERR_NONE);
     }

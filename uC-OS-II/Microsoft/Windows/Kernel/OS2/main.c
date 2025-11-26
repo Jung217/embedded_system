@@ -88,9 +88,19 @@ static  void  StartupTask(void* p_arg);
 */
 
 static void task(void* p_arg);
+static void cus(void* p_arg);
 
 int missDeadline = 0;
 int missTask;
+
+float CUS_SERVER_SIZE;
+int ServerDeadline = 0;
+int ServerState = 0;
+int CurrentJobIndex = -1;
+
+aperiodic_task_para_set* CurrentCusJob = NULL;
+OS_TCB* CusTCB = NULL;
+
 void task(void* p_arg) {
     task_para_set* task_data = (task_para_set*)p_arg;
 
@@ -135,6 +145,98 @@ void task(void* p_arg) {
     while (1) {}
 }
 
+void cus(void* p_arg) {
+    while (1) {
+        OS_ENTER_CRITICAL();
+        if (CurrentJobIndex == -1) {
+            OS_EXIT_CRITICAL();
+            OSTaskSuspend(OS_PRIO_SELF);
+
+            OS_ENTER_CRITICAL();
+            if (CurrentJobIndex == -1) {
+                OS_EXIT_CRITICAL();
+                continue;
+            }
+        }
+        OS_EXIT_CRITICAL();
+
+        if (CurrentJobIndex < 0 || CurrentJobIndex >= APERIODIC_TASK_NUMBER) continue;
+
+        aperiodic_task_para_set* curTask = &AperiodicTaskParameter[CurrentJobIndex];
+
+        while (curTask->TaskRemainTime > 0) {
+            LOG_print(3, "./Output.txt", "%2d  Aperiodic job(% d) is running\n", OSTimeGet(), curTask->TaskID);
+
+            int timeTag = OSTimeGet();
+            while (OSTimeGet() == timeTag) {}
+            curTask->TaskRemainTime--;
+        }
+
+        OS_ENTER_CRITICAL();
+        if (curTask->TaskRemainTime == 0) {
+            int timeTag = OSTimeGet();
+
+            OS_TCB* ptcb = OSTCBList;
+            OS_TCB* next_tcb = NULL;
+            INT32U min_deadline = 0xFFFFFFFF;
+            INT16U min_task_id = 0xFFFF;
+
+            while (ptcb != NULL) {
+                if (ptcb->OSTCBStat == OS_STAT_RDY &&
+                    ptcb->OSTCBDly == 0 &&
+                    ptcb != OSTCBCur &&
+                    ptcb->OSTCBPrio != OS_TASK_IDLE_PRIO)
+                {
+                    if (ptcb->OSTCBExtPtr != NULL) {
+                        if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine < min_deadline) {
+                            min_deadline = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine;
+                            min_task_id = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
+                            next_tcb = ptcb;
+                        }
+                        else if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskDeadLine == min_deadline) {
+                            if (((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID < min_task_id) {
+                                min_task_id = ((task_para_set*)(ptcb->OSTCBExtPtr))->TaskID;
+                                next_tcb = ptcb;
+                            }
+                        }
+                    }
+                }
+                ptcb = ptcb->OSTCBNext;
+            }
+
+            int next_id = 0;
+            int next_job_no = 0;
+
+            if (next_tcb != NULL) {
+                task_para_set* next_ext = (task_para_set*)next_tcb->OSTCBExtPtr;
+                next_id = next_ext->TaskID;
+                next_job_no = next_ext->TaskID;
+            }
+            else {
+                next_id = 63;
+                next_job_no = 0;
+            }
+
+            LOG_print(3, "./Output.txt", "%2d  Aperiodic job (%d) is finished.\n", timeTag, curTask->TaskID);
+            LOG_print(3, "./Output.txt", "%2d  Completion\ttask(%2d)(%2d)\ttask(%2d)(%2d)\t%d\t%d\tN/A\n",
+                timeTag,
+                TaskParameter[TASK_NUMBER - 1].TaskID,
+                curTask->TaskID,
+                next_id,
+                next_job_no, 
+                timeTag - curTask->TaskArriveTime,
+                (timeTag - curTask->TaskArriveTime) - curTask->TaskExecutionTime
+            );
+
+            curTask->TaskIsFinished = 1;
+            CurrentJobIndex = -1;
+            task_para_set* task_data = OSTCBCur->OSTCBExtPtr;
+            task_data->TaskID++;
+
+        }
+        OS_EXIT_CRITICAL();
+    }
+}
 /*void task(void* p_arg) { // with RM
     task_para_set* task_data = p_arg;
 
@@ -177,10 +279,11 @@ int  main(void)
 
     OutFileInit();
     InputFile();
+    InputAperiodicjobsFile();
 
     Task_STK = malloc(TASK_NUMBER * sizeof(int*));
 
-
+#if ALGORITHM == RM
     for (int a = 0; a < TASK_NUMBER - 1; a++) {
         for (int b = a + 1; b < TASK_NUMBER; b++) {
             if (TaskParameter[a].TaskPeriodic > TaskParameter[b].TaskPeriodic) {
@@ -192,20 +295,56 @@ int  main(void)
     }
 
     for (int i = 0; i < TASK_NUMBER; i++) TaskParameter[i].TaskPriority = i + 1;
+#endif
 
-    for (int n = 0; n < TASK_NUMBER; n++)
-    {
-        Task_STK[n] = malloc(TASK_STACKSIZE * sizeof(int));
-        OSTaskCreateExt(task,
-            &TaskParameter[n],
-            &Task_STK[n][TASK_STACKSIZE - 1],
-            TaskParameter[n].TaskPriority,
-            TaskParameter[n].TaskID,
-            &Task_STK[n][0],
+    if (CUS_SERVER_SIZE > 0) {
+        for (int n = 0; n < TASK_NUMBER - 1; n++)
+        {
+            Task_STK[n] = malloc(TASK_STACKSIZE * sizeof(int));
+            OSTaskCreateExt(task,
+                &TaskParameter[n],
+                &Task_STK[n][TASK_STACKSIZE - 1],
+                TaskParameter[n].TaskPriority,
+                TaskParameter[n].TaskID,
+                &Task_STK[n][0],
+                TASK_STACKSIZE,
+                &TaskParameter[n],
+                (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
+
+        }
+
+        int cusIdx = TASK_NUMBER - 1;
+        Task_STK[cusIdx] = malloc(TASK_STACKSIZE * sizeof(int));
+
+        OSTaskCreateExt(cus,
+            &TaskParameter[cusIdx],
+            &Task_STK[cusIdx][TASK_STACKSIZE - 1],
+            TaskParameter[cusIdx].TaskPriority,
+            TaskParameter[cusIdx].TaskID,
+            &Task_STK[cusIdx][0],
             TASK_STACKSIZE,
-            &TaskParameter[n],
+            &TaskParameter[cusIdx],
             (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
 
+        CusTCB = OSTCBPrioTbl[TaskParameter[cusIdx].TaskPriority];
+
+        if (CusTCB == NULL) printf("Error: CUS Task TCB not found!\n");
+    }
+    else {
+        for (int n = 0; n < TASK_NUMBER; n++)
+        {
+            Task_STK[n] = malloc(TASK_STACKSIZE * sizeof(int));
+            OSTaskCreateExt(task,
+                &TaskParameter[n],
+                &Task_STK[n][TASK_STACKSIZE - 1],
+                TaskParameter[n].TaskPriority,
+                TaskParameter[n].TaskID,
+                &Task_STK[n][0],
+                TASK_STACKSIZE,
+                &TaskParameter[n],
+                (OS_TASK_OPT_STK_CHK | OS_TASK_OPT_STK_CLR));
+
+        }
     }
 
 #if OS_TASK_NAME_EN > 0u
@@ -216,7 +355,7 @@ int  main(void)
     ptcb = OSTCBList;
     OSTimeSet(0);
 
-    printf("==========TCB linked list==========\n");
+    printf("\n==========TCB linked list==========\n");
     printf("Task \t Prev_TCB_addr   TCB_addr   Next_TCB_addr\n");
     for (int i = TASK_NUMBER;i >= 0;i--) if (OSTCBTbl[i].OSTCBPrio != 0) printf("%2d \t %6x \t %6x \t %6x\n", OSTCBTbl[i].OSTCBPrio, OSTCBTbl[i].OSTCBPrev, &OSTCBTbl[i], OSTCBTbl[i].OSTCBNext);
     printf("\n");

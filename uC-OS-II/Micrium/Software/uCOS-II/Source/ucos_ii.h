@@ -91,16 +91,29 @@ extern "C" {
         INT16U TaskDelay;
     } task_para_set;
 
+    typedef struct aperiodic_task_para_set {
+        INT32U TaskID;
+        INT32U TaskArriveTime;
+        INT32U TaskExecutionTime;
+        INT32U TaskAbsoluteDeadline;
+        INT32U TaskFinishedTime;
+        INT16U TaskRemainTime;
+        INT8U  TaskIsArrived;
+        INT8U  TaskIsFinished;
+    } aperiodic_task_para_set;
+
     int TASK_NUMBER;
+    int APERIODIC_TASK_NUMBER;
     OS_STK** Task_STK;
     task_para_set TaskParameter[OS_MAX_TASKS];
-    task_para_set AperiodicTaskParameter[OS_MAX_TASKS];
+    aperiodic_task_para_set AperiodicTaskParameter[OS_MAX_TASKS];
     FILE* fp;
     FILE* Output_fp;
     errno_t Output_err;
 
     void    OutFileInit(void);
     void    InputFile(void);
+    void    InputAperiodicjobsFile(void);
 
 
 #ifdef   OS_GLOBALS

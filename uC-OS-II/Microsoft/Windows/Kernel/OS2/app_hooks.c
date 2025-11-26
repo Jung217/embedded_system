@@ -44,6 +44,11 @@
 *********************************************************************************************************
 */
 
+extern float CUS_SERVER_SIZE;
+extern ServerDeadline;
+extern CurrentJobIndex;
+extern OS_TCB* CusTCB;
+
 #define LOG_CONSOLE 1
 #define LOG_FILE    2
 #define LOG_BOTH    3
@@ -81,10 +86,8 @@ void OutFileInit() {
 void InputFile() {
     errno_t err;
 
-    if ((err = fopen_s(&fp, INPUT_FILE_NAME, "r")) == 0)
-        printf("The file %s was opened\n", INPUT_FILE_NAME);
-    else 
-        printf("The file %s was not opened\n", INPUT_FILE_NAME);
+    if ((err = fopen_s(&fp, INPUT_FILE_NAME, "r")) == 0) printf("\nThe file %s was opened\n", INPUT_FILE_NAME);
+    else printf("\nThe file %s was not opened\n", INPUT_FILE_NAME);
 
     char str[MAX];
     char* ptr;
@@ -105,7 +108,15 @@ void InputFile() {
                 TASK_NUMBER++;
                 TaskParameter[j].TaskID = TASK_NUMBER;
             }
-            else if (i == 1) TaskParameter[j].TaskArriveTime = TaskInfo[i];
+            else if (i == 1) {
+                TaskParameter[j].TaskArriveTime = TaskInfo[i];
+                if (ptr == NULL) {
+                    CUS_SERVER_SIZE = (float)TaskInfo[i] / 100.0;
+                    TaskParameter[j].TaskArriveTime = 0;
+                    TaskParameter[j].TaskPriority = 0;
+                    TaskParameter[j].TaskDeadLine = 65535;
+                }
+            }
             else if (i == 2) {
                 TaskParameter[j].TaskExecutionTime = TaskInfo[i];
                 TaskParameter[j].TaskRemainTime = TaskInfo[i];
@@ -120,51 +131,47 @@ void InputFile() {
     fclose(fp);
 }
 
+
 void InputAperiodicjobsFile() {
     errno_t err;
 
-    if ((err = fopen_s(&fp, APERIODIC_FILE_NAME, "r")) == 0)
-        printf("The file %s was opened\n", APERIODIC_FILE_NAME);
-    else
-        printf("The file %s was not opened\n", APERIODIC_FILE_NAME);
+    if ((err = fopen_s(&fp, APERIODIC_FILE_NAME, "r")) == 0) printf("\nThe file %s was opened\n\n", APERIODIC_FILE_NAME);
+    else printf("\nThe file %s was not opened\n\n", APERIODIC_FILE_NAME);
 
     char str[MAX];
     char* ptr;
     char* pTmp = NULL;
-    int TaskInfo[INFO], i;
-    int j = TASK_NUMBER;
-    int AllTaskNumber = j;
+    int TaskInfo[INFO], i, j=0;
+    APERIODIC_TASK_NUMBER = 0;
 
-    while (!feof(fp)) {
+    while (fgets(str, sizeof(str) - 1, fp) != NULL) {
         i = 0;
-        memset(str, 0, sizeof(str));
-        fgets(str, sizeof(str) - 1, fp);
         ptr = strtok_s(str, " ", &pTmp);
 
         while (ptr != NULL) {
             TaskInfo[i] = atoi(ptr);
             ptr = strtok_s(NULL, " ", &pTmp);
+
             if (i == 0) {
-                AllTaskNumber++;
-                AperiodicTaskParameter[j].TaskID = AllTaskNumber;
+                AperiodicTaskParameter[j].TaskID = TaskInfo[0];
+                AperiodicTaskParameter[j].TaskIsArrived = 0;
+                AperiodicTaskParameter[j].TaskIsFinished = 0;
             }
-            else if (i == 1)  AperiodicTaskParameter[j].TaskArriveTime = TaskInfo[i];
+            else if (i == 1) AperiodicTaskParameter[j].TaskArriveTime = TaskInfo[i];
             else if (i == 2) {
                 AperiodicTaskParameter[j].TaskExecutionTime = TaskInfo[i];
                 AperiodicTaskParameter[j].TaskRemainTime = TaskInfo[i];
             }
-            else if (i == 3) AperiodicTaskParameter[j].TaskDeadLine = TaskInfo[i];
-            //TaskParameter[j].deadline = TaskParameter[j].TaskArriveTime + TaskParameter[j].TaskPeriodic;
+            else if (i == 3) AperiodicTaskParameter[j].TaskAbsoluteDeadline = TaskInfo[i];
             i++;
         }
-
-        AperiodicTaskParameter[j].TaskPriority = j;
-
-        j++;
+        if (i > 0) {
+            APERIODIC_TASK_NUMBER ++;
+            j++;
+        }
     }
     fclose(fp);
-
-
+    printf("Total Aperiodic Jobs Loaded: %d\n", APERIODIC_TASK_NUMBER);
 }
 
 /*
@@ -391,6 +398,91 @@ void  App_TimeTickHook (void)
 #if (APP_CFG_PROBE_OS_PLUGIN_EN == DEF_ENABLED) && (OS_PROBE_HOOKS_EN > 0)
     OSProbe_TickHook();
 #endif
+    if (CUS_SERVER_SIZE > 0) {
+        int timeTag = OSTimeGet() + 1;
+        for (int i = 0 ; i < APERIODIC_TASK_NUMBER ; i++) {
+            if (AperiodicTaskParameter[i].TaskArriveTime == timeTag) {
+                AperiodicTaskParameter[i].TaskIsArrived = 1;
+
+                if (timeTag < ServerDeadline && CurrentJobIndex != -1) {
+                    LOG_print(3, "./Output.txt", "%2d  Aperiodic job (%d) arrives. Do nothing.\n",
+                        timeTag, 
+                        AperiodicTaskParameter[i].TaskID
+                    );
+                }
+                else if (CurrentJobIndex == -1) {
+                    int newDeadline = timeTag + (INT32U)(AperiodicTaskParameter[i].TaskExecutionTime / CUS_SERVER_SIZE);
+
+                    if (AperiodicTaskParameter[i].TaskAbsoluteDeadline >= newDeadline) {
+                        LOG_print(3, "./Output.txt", "%2d  Aperiodic job (%d) arrives and sets CUS's deadline as %d.\n",
+                            timeTag, 
+                            AperiodicTaskParameter[i].TaskID, 
+                            newDeadline
+                        );
+
+                        OS_ENTER_CRITICAL();
+                        ServerDeadline = newDeadline;
+                        CurrentJobIndex = i;
+
+                        if (CusTCB != NULL) {
+                            if (((task_para_set*)(CusTCB->OSTCBExtPtr)) != NULL) ((task_para_set*)(CusTCB->OSTCBExtPtr))->TaskDeadLine = ServerDeadline;
+                            OSTaskResume(CusTCB->OSTCBPrio);
+                        }
+                        OS_EXIT_CRITICAL();
+                    }
+                    else {
+                        LOG_print(3, "./Output.txt", "%d\tAperiodic job (%d) rejects scheduling.\n", 
+                            timeTag, 
+                            AperiodicTaskParameter[i].TaskID
+                        );
+                        AperiodicTaskParameter[i].TaskIsFinished = 1;
+                    }
+                }
+            }
+        }
+
+        if (timeTag == ServerDeadline) {
+            int nextTaskIdx = -1;
+            for (int i = 0; i < APERIODIC_TASK_NUMBER; i++) {
+                if (AperiodicTaskParameter[i].TaskIsArrived && !AperiodicTaskParameter[i].TaskIsFinished && i != CurrentJobIndex) {
+                    nextTaskIdx = i;
+                    break;
+                }
+            }
+
+            if (nextTaskIdx != -1) {
+                int new_deadline = timeTag + (int)(AperiodicTaskParameter[nextTaskIdx].TaskExecutionTime / CUS_SERVER_SIZE);
+
+                if (AperiodicTaskParameter[nextTaskIdx].TaskAbsoluteDeadline >= new_deadline) {
+                    LOG_print(3, "./Output.txt", "%2d  Aperiodic job (%d) sets CUS's deadline as %d.\n",
+                        timeTag, 
+                        AperiodicTaskParameter[nextTaskIdx].TaskID,
+                        new_deadline
+                    );
+
+                    OS_ENTER_CRITICAL();
+                    ServerDeadline = new_deadline;
+                    CurrentJobIndex = nextTaskIdx;
+
+                    if (CusTCB != NULL) {
+                        task_para_set* cus_ext = (task_para_set*)CusTCB->OSTCBExtPtr;
+                        if (cus_ext != NULL) {
+                            cus_ext->TaskDeadLine = ServerDeadline;
+                        }
+                        OSTaskResume(CusTCB->OSTCBPrio);
+                    }
+                    OS_EXIT_CRITICAL();
+                }
+                else {
+                    LOG_print(3, "./Output.txt", "%2d  Aperiodic job (%d) rejects scheduling.\n",
+                        timeTag, 
+                        AperiodicTaskParameter[nextTaskIdx].TaskID
+                    );
+                    AperiodicTaskParameter[nextTaskIdx].TaskIsFinished = 1;
+                }
+            }
+        }
+    }
 }
 #endif
 #endif
